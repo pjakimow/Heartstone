@@ -10,11 +10,15 @@ class Monster implements Card {
     private int attack;
     private int health;
 
-    public Monster(CardType type, int cost, int attack, int health) {
+    Monster(CardType type, int cost, int attack, int health) {
         this.type = type;
         this.cost = cost;
         this.attack = attack;
         this.health = health;
+    }
+
+    static Monster fromMonster(Monster that) {
+        return new Monster(that.getType(), that.getCost(), that.getAttack(), that.getHealth());
     }
 
     @Override
@@ -32,5 +36,32 @@ class Monster implements Card {
 
     public int getHealth() {
         return health;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Monster)) return false;
+
+        Monster monster = (Monster) o;
+
+        return uuid.equals(monster.uuid);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return uuid.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "Monster{" +
+                "uuid='" + uuid + '\'' +
+                ", type=" + type +
+                ", cost=" + cost +
+                ", attack=" + attack +
+                ", health=" + health +
+                '}';
     }
 }

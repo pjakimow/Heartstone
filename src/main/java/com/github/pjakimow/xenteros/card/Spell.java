@@ -10,11 +10,16 @@ class Spell implements Card {
     private SpellAction action;
 
 
-    public Spell(CardType type, int cost, SpellAction action) {
+    Spell(CardType type, int cost, SpellAction action) {
         this.type = type;
         this.cost = cost;
         this.action = action;
     }
+
+    static Spell fromSpell(Spell that) {
+        return new Spell(that.getType(), that.getCost(), that.getAction());
+    }
+
 
     @Override
     public CardType getType() {

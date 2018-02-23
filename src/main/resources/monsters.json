@@ -1,0 +1,44 @@
+[
+  {
+    "type": "MONSTER",
+    "cost": 1,
+    "attack": 2,
+    "health": 5
+  },
+  {
+    "type": "MONSTER",
+    "cost": 2,
+    "attack": 3,
+    "health": 6
+  },
+  {
+    "type": "MONSTER",
+    "cost": 3,
+    "attack": 4,
+    "health": 7
+  },
+  {
+    "type": "MONSTER",
+    "cost": 4,
+    "attack": 5,
+    "health": 8
+  },
+  {
+    "type": "MONSTER",
+    "cost": 5,
+    "attack": 6,
+    "health": 9
+  },
+  {
+    "type": "MONSTER",
+    "cost": 1,
+    "attack": 1,
+    "health": 3
+  },
+  {
+    "type": "MONSTER",
+    "cost": 2,
+    "attack": 2,
+    "health": 5
+  }
+]

@@ -6,4 +6,8 @@ class GameManager {
 
     private Player white;
     private Player black;
+
+    public void run() {
+
+    }
 }

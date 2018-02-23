@@ -1,0 +1,17 @@
+[
+  {
+    "type": "SPELL",
+    "cost": 3,
+    "action": "DRAW_2_CARDS"
+  },
+  {
+    "type": "SPELL",
+    "cost": 3,
+    "action": "DEAL_2_DAMAGE_RESTORE_2_HEALTH"
+  },
+  {
+    "type": "SPELL",
+    "cost": 3,
+    "action": "DEAL_1_DAMAGE_DRAW_1_CARD"
+  }
+]
