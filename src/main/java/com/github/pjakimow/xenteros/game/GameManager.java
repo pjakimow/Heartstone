@@ -16,6 +16,7 @@ class GameManager {
         this.playerService = playerService;
         this.white = playerService.createPlayer();
         this.black = playerService.createPlayer();
+        run();
     }
 
     private Player white;
