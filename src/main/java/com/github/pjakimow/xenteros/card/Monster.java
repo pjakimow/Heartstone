@@ -66,7 +66,7 @@ public class Monster implements Card {
     @Override
     public String toString() {
         return "Monster:" +
-                ", C=" + cost +
+                " C=" + cost +
                 ", A=" + attack +
                 ", H=" + health;
     }

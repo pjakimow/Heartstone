@@ -39,20 +39,20 @@ public class Player {
         return health;
     }
 
+    int getMana() {
+        return mana;
+    }
+
     void trashCard(Card card) {
         trashedCards.add(card);
     }
 
-    void beginTurn() {
+    void beginTurn(int round) {
         drawCards(1);
+        setMana(round);
     }
 
-    void endTurn() {
-        temp.forEach(m -> table.put(m.getUuid(), m));
-        temp.clear();
-    }
-
-    public Card playCard(String uuid) {
+    Card playCard(String uuid) {
 
         Card card = hand.get(uuid);
         if (card.getCost() > this.mana) {
@@ -100,7 +100,7 @@ public class Player {
         }
     }
 
-    void setMana(int round) {
+    private void setMana(int round) {
         this.mana = min(round, 10);
     }
 
@@ -113,5 +113,18 @@ public class Player {
 
     void moveMonstersToTable(Collection<Monster> monsters) {
         monsters.forEach(m -> table.put(m.getUuid(), m));
+    }
+
+    void heal(int points) {
+        health += points;
+    }
+
+    public void printHand() {
+        System.out.println("Hand:");
+        hand.values().forEach(System.out::println);
+    }
+    public void printTable() {
+        System.out.println("Table:");
+        table.values().forEach(System.out::println);
     }
 }
