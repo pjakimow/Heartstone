@@ -2,6 +2,9 @@ package com.github.pjakimow.xenteros.card;
 
 import java.util.UUID;
 
+import static com.github.pjakimow.xenteros.card.MonsterAbility.CHARGE;
+import static com.github.pjakimow.xenteros.card.MonsterAbility.TAUNT;
+
 public class Monster implements Card {
 
     private String uuid = UUID.randomUUID().toString();
@@ -9,16 +12,18 @@ public class Monster implements Card {
     private int cost;
     private int attack;
     private int health;
+    private MonsterAbility monsterAbility;
 
-    Monster(CardType type, int cost, int attack, int health) {
+    Monster(CardType type, int cost, int attack, int health, MonsterAbility monsterAbility) {
         this.type = type;
         this.cost = cost;
         this.attack = attack;
         this.health = health;
+        this.monsterAbility = monsterAbility;
     }
 
     static Monster fromMonster(Monster that) {
-        return new Monster(that.getType(), that.getCost(), that.getAttack(), that.getHealth());
+        return new Monster(that.getType(), that.getCost(), that.getAttack(), that.getHealth(), that.getMonsterAbility());
     }
 
     @Override
@@ -41,6 +46,18 @@ public class Monster implements Card {
 
     public int getHealth() {
         return health;
+    }
+
+    public boolean hasTaunt() {
+        return monsterAbility == TAUNT;
+    }
+
+    public boolean hasCharge() {
+        return monsterAbility == CHARGE;
+    }
+
+    public MonsterAbility getMonsterAbility() {
+        return monsterAbility;
     }
 
     public void receiveAttack(int attack) {

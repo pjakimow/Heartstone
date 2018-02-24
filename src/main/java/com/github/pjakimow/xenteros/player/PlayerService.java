@@ -36,7 +36,7 @@ public class PlayerService {
                 break;
             }
 
-            try{
+            try {
                 player.playCard(userChoice.getUuid());
             } catch (IllegalMoveException e) {
                 System.out.println("You already have 7 monsters on the table. Pick another one.");
@@ -44,7 +44,12 @@ public class PlayerService {
             }
 
             if (userChoice instanceof Monster) {
-                playedMonsters.add((Monster) userChoice);
+                Monster monster = (Monster) userChoice;
+                if (monster.hasCharge()) {
+                    player.addChargeMonsterToTable(monster);
+                } else {
+                    playedMonsters.add(monster);
+                }
             } else {
                 throwSpell((Spell) userChoice, player, opponent);
             }
@@ -101,20 +106,27 @@ public class PlayerService {
     }
 
     private void attackOpponent(int power, Player opponent) {
-        List<Monster> opponentTable = opponent.getTable();
+        List<Monster> opponentTableToAttack = opponent.getMonstersToAttack();
         int opponentHealth = opponent.getHealth();
         System.out.println(format("Who would you like to attack with %d damage?", power));
 
-        for (int i = 0; i < opponentTable.size(); i++) {
-            System.out.println((i + 1) + ": " + opponentTable.get(i));
+        for (int i = 0; i < opponentTableToAttack.size(); i++) {
+            System.out.println((i + 1) + ": " + opponentTableToAttack.get(i));
         }
-        System.out.println(format("Other number: Character with %d health.", opponentHealth));
+        if (!opponent.hasTaunt()) {
+            System.out.println(format("Other number: Character with %d health.", opponentHealth));
+        }
 
         int userChoice = sc.nextInt();
-        if (userChoice <= 0 || userChoice > opponentTable.size()) {
-            opponent.receiveAttack(power);
+        if (userChoice <= 0 || userChoice > opponentTableToAttack.size()) {
+            if (!opponent.hasTaunt()) {
+                opponent.receiveAttack(power);
+            } else {
+                System.out.println("You must attack a monster!");
+                attackOpponent(power, opponent);
+            }
         } else {
-            opponent.receiveAttack(opponentTable.get(userChoice - 1).getUuid(), power);
+            opponent.receiveAttack(opponentTableToAttack.get(userChoice - 1).getUuid(), power);
         }
     }
 }

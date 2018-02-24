@@ -5,6 +5,7 @@ import com.github.pjakimow.xenteros.card.Monster;
 
 import java.util.*;
 
+import static com.github.pjakimow.xenteros.card.MonsterAbility.TAUNT;
 import static java.lang.Math.min;
 import static java.util.Collections.shuffle;
 import static java.util.stream.Collectors.toList;
@@ -33,6 +34,15 @@ public class Player {
     List<Monster> getTable() {
         return table.values().stream()
                 .collect(toList());
+    }
+
+    List<Monster> getMonstersToAttack() {
+        if (table.values().stream().anyMatch(m -> m.getMonsterAbility() == TAUNT)) {
+            return table.values().stream()
+                    .filter(Monster::hasTaunt)
+                    .collect(toList());
+        }
+        return getTable();
     }
 
     int getHealth() {
@@ -109,6 +119,14 @@ public class Player {
                 .mapToInt(Card::getCost)
                 .min()
                 .orElse(Integer.MAX_VALUE) <= this.mana;
+    }
+
+    public boolean hasTaunt() {
+        return table.values().stream().anyMatch(Monster::hasTaunt);
+    }
+
+    public void addChargeMonsterToTable(Monster monster) {
+        table.put(monster.getUuid(), monster);
     }
 
     void moveMonstersToTable(Collection<Monster> monsters) {
