@@ -2,7 +2,7 @@ package com.github.pjakimow.xenteros.card;
 
 import java.util.UUID;
 
-class Spell implements Card {
+public class Spell implements Card {
 
     private String uuid = UUID.randomUUID().toString();
     private CardType type;
@@ -36,5 +36,12 @@ class Spell implements Card {
 
     public SpellAction getAction() {
         return action;
+    }
+
+    @Override
+    public String toString() {
+        return "Spell:" +
+                "C=" + cost +
+                ", A=" + action;
     }
 }
