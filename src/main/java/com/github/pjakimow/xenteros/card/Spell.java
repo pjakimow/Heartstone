@@ -20,14 +20,14 @@ class Spell implements Card {
         return new Spell(that.getType(), that.getCost(), that.getAction());
     }
 
+    @Override
+    public String getUuid() {
+        return uuid;
+    }
 
     @Override
     public CardType getType() {
         return type;
-    }
-
-    public String getUuid() {
-        return uuid;
     }
 
     public int getCost() {

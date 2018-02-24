@@ -9,7 +9,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -18,9 +19,9 @@ import static java.util.stream.Collectors.toSet;
 @Component
 public class DeckProvider {
 
-    public Set<Card> getDeck() {
+    public List<Card> getDeck() {
 
-        Set<Card> result = new HashSet<>();
+        List<Card> result = new LinkedList<>();
         try {
             result.addAll(readMonsters());
             result.addAll(readSpells());

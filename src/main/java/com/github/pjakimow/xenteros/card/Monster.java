@@ -2,7 +2,7 @@ package com.github.pjakimow.xenteros.card;
 
 import java.util.UUID;
 
-class Monster implements Card {
+public class Monster implements Card {
 
     private String uuid = UUID.randomUUID().toString();
     private CardType type;
@@ -26,6 +26,11 @@ class Monster implements Card {
         return type;
     }
 
+    @Override
+    public String getUuid() {
+        return uuid;
+    }
+
     public int getCost() {
         return cost;
     }
@@ -36,6 +41,10 @@ class Monster implements Card {
 
     public int getHealth() {
         return health;
+    }
+
+    public void receiveAttack(int attack) {
+        this.health -= attack;
     }
 
     @Override
@@ -57,7 +66,7 @@ class Monster implements Card {
     @Override
     public String toString() {
         return "Monster{" +
-                "uuid='" + uuid + '\'' +
+                "getUuid='" + uuid + '\'' +
                 ", type=" + type +
                 ", cost=" + cost +
                 ", attack=" + attack +
