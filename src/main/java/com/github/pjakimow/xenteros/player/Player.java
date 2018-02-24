@@ -7,6 +7,7 @@ import java.util.*;
 
 import static java.lang.Math.min;
 import static java.util.Collections.shuffle;
+import static java.util.stream.Collectors.toList;
 
 public class Player {
 
@@ -14,6 +15,7 @@ public class Player {
     private int mana;
     private Queue<Card> deck;
     private Map<String, Card> hand = new HashMap<>();
+    private Set<Monster> temp = new HashSet<>();
     private Map<String, Monster> table = new HashMap<>();
     private List<Card> trashedCards = new LinkedList<>();
 
@@ -23,26 +25,50 @@ public class Player {
         deck = new LinkedList<>(cards);
     }
 
+    List<Card> getHand() {
+        return hand.values().stream()
+                .collect(toList());
+    }
+
+    List<Monster> getTable() {
+        return table.values().stream()
+                .collect(toList());
+    }
+
+    int getHealth() {
+        return health;
+    }
+
+    void trashCard(Card card) {
+        trashedCards.add(card);
+    }
+
+    void beginTurn() {
+        drawCards(1);
+    }
+
+    void endTurn() {
+        temp.forEach(m -> table.put(m.getUuid(), m));
+        temp.clear();
+    }
+
     public Card playCard(String uuid) {
 
         Card card = hand.get(uuid);
         if (card.getCost() > this.mana) {
             throw new IllegalMoveException();
         }
-        if (card instanceof Monster && table.size() == 7) {
+        if (card instanceof Monster && table.size() + temp.size() >= 7) {
             throw new IllegalMoveException();
         }
 
         hand.remove(uuid);
         this.mana -= card.getCost();
 
-        trashedCards.add(card);
-        drawCard().ifPresent(c -> hand.put(c.getUuid(), c));
-
         return card;
     }
 
-    public void receiveAttack(String uuid, int power) {
+    void receiveAttack(String uuid, int power) {
         Monster attackedCard = table.get(uuid);
         attackedCard.receiveAttack(power);
 
@@ -52,7 +78,7 @@ public class Player {
         }
     }
 
-    public void receiveAttack(int power) {
+    void receiveAttack(int power) {
         this.health -= power;
         if (this.health <= 0) {
             throw new PlayerDeadException();
@@ -78,8 +104,14 @@ public class Player {
         this.mana = min(round, 10);
     }
 
-
     boolean canPlayCard() {
-        return hand.values().stream().mapToInt(Card::getCost).min().orElse(Integer.MAX_VALUE) <= this.mana;
+        return hand.values().stream()
+                .mapToInt(Card::getCost)
+                .min()
+                .orElse(Integer.MAX_VALUE) <= this.mana;
+    }
+
+    void moveMonstersToTable(Collection<Monster> monsters) {
+        monsters.forEach(m -> table.put(m.getUuid(), m));
     }
 }

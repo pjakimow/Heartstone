@@ -65,12 +65,9 @@ public class Monster implements Card {
 
     @Override
     public String toString() {
-        return "Monster{" +
-                "getUuid='" + uuid + '\'' +
-                ", type=" + type +
-                ", cost=" + cost +
-                ", attack=" + attack +
-                ", health=" + health +
-                '}';
+        return "Monster:" +
+                ", C=" + cost +
+                ", A=" + attack +
+                ", H=" + health;
     }
 }

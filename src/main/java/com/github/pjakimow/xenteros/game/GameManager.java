@@ -22,17 +22,17 @@ class GameManager {
     private Player white;
     private Player black;
 
-    public void run() {
+    private void run() {
         while(true) {
 
             playerService.setUp(white, black);
 
             try {
-                playerService.move(white);
+                playerService.move(white, black);
             }catch (PlayerDeadException e) {
                 //white won, as during his turn the exception was thrown
             }try {
-                playerService.move(black);
+                playerService.move(black, white);
             } catch (PlayerDeadException e) {
                 //black won, as during his turn the exception was thrown
             }
