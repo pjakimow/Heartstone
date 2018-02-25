@@ -19,6 +19,7 @@ public class Player {
     private Set<Monster> temp = new HashSet<>();
     private Map<String, Monster> table = new HashMap<>();
     private List<Card> trashedCards = new LinkedList<>();
+    private int failedDrawAttempts = 0;
 
     Player(int mana, List<Card> cards) {
         this.mana = mana;
@@ -97,9 +98,9 @@ public class Player {
 
     private Optional<Card> drawCard() {
         if (deck.isEmpty()) {
-            shuffle(trashedCards);
-            deck.addAll(trashedCards);
-            trashedCards = new LinkedList<>();
+            this.failedDrawAttempts++;
+            this.health -= failedDrawAttempts;
+            return Optional.empty();
         }
         return Optional.ofNullable(deck.poll());
     }
