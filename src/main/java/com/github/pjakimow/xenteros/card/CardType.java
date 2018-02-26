@@ -1,5 +1,5 @@
 package com.github.pjakimow.xenteros.card;
 
-enum CardType {
+public enum CardType {
     SPELL, MONSTER
 }

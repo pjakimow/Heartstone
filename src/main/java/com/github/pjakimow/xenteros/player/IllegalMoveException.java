@@ -1,4 +1,4 @@
 package com.github.pjakimow.xenteros.player;
 
-class IllegalMoveException extends RuntimeException {
+public class IllegalMoveException extends RuntimeException {
 }
