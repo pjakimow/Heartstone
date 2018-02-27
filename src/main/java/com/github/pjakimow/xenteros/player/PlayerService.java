@@ -4,7 +4,6 @@ import com.github.pjakimow.xenteros.card.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -27,7 +26,6 @@ public class PlayerService {
 
     public void move(Player player, Player opponent, int round) {
         player.beginTurn(round);
-        List<Monster> playedMonsters = new ArrayList<>();
 
 
         while (player.canPlayCard()) {
@@ -47,8 +45,6 @@ public class PlayerService {
                 Monster monster = (Monster) userChoice;
                 if (monster.hasCharge()) {
                     player.addChargeMonsterToTable(monster);
-                } else {
-                    playedMonsters.add(monster);
                 }
             } else {
                 throwSpell((Spell) userChoice, player, opponent);
@@ -60,7 +56,7 @@ public class PlayerService {
             attackOpponent(monster.getAttack(), opponent);
         }
 
-        player.moveMonstersToTable(playedMonsters);
+        player.moveMonstersToTable();
     }
 
 
