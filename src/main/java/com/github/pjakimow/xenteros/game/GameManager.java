@@ -12,6 +12,8 @@ import static java.lang.String.format;
 class GameManager {
 
     private PlayerService playerService;
+    private Player white;
+    private Player black;
 
     @Autowired
     public GameManager(PlayerService playerService) {
@@ -20,9 +22,6 @@ class GameManager {
         this.black = playerService.createPlayer();
         run();
     }
-
-    private Player white;
-    private Player black;
 
     private void run() {
         playerService.setUp(white, black);
