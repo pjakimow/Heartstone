@@ -14,7 +14,7 @@ public class Monster implements Card {
     private int health;
     private MonsterAbility monsterAbility;
 
-    Monster(CardType type, int cost, int attack, int health, MonsterAbility monsterAbility) {
+    public Monster(CardType type, int cost, int attack, int health, MonsterAbility monsterAbility) {
         this.type = type;
         this.cost = cost;
         this.attack = attack;
@@ -87,4 +87,5 @@ public class Monster implements Card {
                 ", A=" + attack +
                 ", H=" + health;
     }
+    
 }

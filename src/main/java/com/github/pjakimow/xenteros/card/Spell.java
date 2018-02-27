@@ -10,7 +10,7 @@ public class Spell implements Card {
     private SpellAction action;
 
 
-    Spell(CardType type, int cost, SpellAction action) {
+    public Spell(CardType type, int cost, SpellAction action) {
         this.type = type;
         this.cost = cost;
         this.action = action;
@@ -44,4 +44,5 @@ public class Spell implements Card {
                 "C=" + cost +
                 ", A=" + action;
     }
+    
 }

@@ -20,13 +20,13 @@ public class Player {
     private Map<String, Monster> table = new HashMap<>();
     private int failedDrawAttempts = 0;
 
-    Player(int mana, List<Card> cards) {
+    public Player(int mana, List<Card> cards) {
         this.mana = mana;
         shuffle(cards);
         deck = new LinkedList<>(cards);
     }
 
-    List<Card> getHand() {
+    public List<Card> getHand() {
         return hand.values().stream()
                 .collect(toList());
     }
@@ -36,7 +36,7 @@ public class Player {
                 .collect(toList());
     }
 
-    List<Monster> getMonstersToAttack() {
+    public List<Monster> getMonstersToAttack() {
         if (table.values().stream().anyMatch(m -> m.getMonsterAbility() == TAUNT)) {
             return table.values().stream()
                     .filter(Monster::hasTaunt)
@@ -58,7 +58,7 @@ public class Player {
         setMana(round);
     }
 
-    Card playCard(String uuid) {
+    public Card playCard(String uuid) {
 
         Card card = hand.get(uuid);
         if (card.getCost() > this.mana) {
@@ -103,13 +103,13 @@ public class Player {
         return Optional.ofNullable(deck.poll());
     }
 
-    void drawCards(int n) {
+    public void drawCards(int n) {
         for (int i = 0; i < n; i++) {
             drawCard().ifPresent(c -> hand.put(c.getUuid(), c));
         }
     }
 
-    private void setMana(int round) {
+    public void setMana(int round) {
         this.mana = min(round, 10);
     }
 
@@ -144,5 +144,13 @@ public class Player {
     public void printTable() {
         System.out.println("Table:");
         table.values().forEach(System.out::println);
+    }
+    
+    public int getReadyTableSize(){
+    	return table.size();
+    }
+    
+    public int getUnreadyTableSize(){
+    	return temp.size();
     }
 }
