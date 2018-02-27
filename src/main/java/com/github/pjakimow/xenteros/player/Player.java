@@ -18,7 +18,6 @@ public class Player {
     private Map<String, Card> hand = new HashMap<>();
     private Set<Monster> temp = new HashSet<>();
     private Map<String, Monster> table = new HashMap<>();
-    private List<Card> trashedCards = new LinkedList<>();
     private int failedDrawAttempts = 0;
 
     Player(int mana, List<Card> cards) {
@@ -54,10 +53,6 @@ public class Player {
         return mana;
     }
 
-    void trashCard(Card card) {
-        trashedCards.add(card);
-    }
-
     void beginTurn(int round) {
         drawCards(1);
         setMana(round);
@@ -73,6 +68,10 @@ public class Player {
             throw new IllegalMoveException();
         }
 
+        if (card instanceof Monster) {
+            temp.add((Monster) card);
+        }
+
         hand.remove(uuid);
         this.mana -= card.getCost();
 
@@ -85,7 +84,6 @@ public class Player {
 
         if (attackedCard.getHealth() < 0) {
             table.remove(uuid);
-            trashedCards.add(attackedCard);
         }
     }
 
@@ -122,16 +120,16 @@ public class Player {
                 .orElse(Integer.MAX_VALUE) <= this.mana;
     }
 
-    public boolean hasTaunt() {
+    boolean hasTaunt() {
         return table.values().stream().anyMatch(Monster::hasTaunt);
     }
 
-    public void addChargeMonsterToTable(Monster monster) {
+    void addChargeMonsterToTable(Monster monster) {
         table.put(monster.getUuid(), monster);
     }
 
-    void moveMonstersToTable(Collection<Monster> monsters) {
-        monsters.forEach(m -> table.put(m.getUuid(), m));
+    void moveMonstersToTable() {
+        temp.forEach(m -> table.put(m.getUuid(), m));
     }
 
     void heal(int points) {
@@ -142,6 +140,7 @@ public class Player {
         System.out.println("Hand:");
         hand.values().forEach(System.out::println);
     }
+
     public void printTable() {
         System.out.println("Table:");
         table.values().forEach(System.out::println);
