@@ -79,5 +79,5 @@ public class CardsPlayingTest {
 	
      	player.playCard(card.getUuid());
 	}
-
+	
 }

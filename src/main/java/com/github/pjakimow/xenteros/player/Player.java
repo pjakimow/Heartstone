@@ -37,7 +37,7 @@ public class Player {
                 .collect(toList());
     }
 
-    List<Monster> getMonstersToAttack() {
+    public List<Monster> getMonstersToAttack() {
         if (table.values().stream().anyMatch(m -> m.getMonsterAbility() == TAUNT)) {
             return table.values().stream()
                     .filter(Monster::hasTaunt)
