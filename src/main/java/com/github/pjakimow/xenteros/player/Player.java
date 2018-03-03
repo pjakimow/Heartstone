@@ -1,6 +1,7 @@
 package com.github.pjakimow.xenteros.player;
 
 import com.github.pjakimow.xenteros.card.Card;
+import com.github.pjakimow.xenteros.card.CardType;
 import com.github.pjakimow.xenteros.card.Monster;
 
 import java.util.*;
@@ -153,4 +154,20 @@ public class Player {
     public int getUnreadyTableSize(){
     	return temp.size();
     }
+    
+    public List<Card> getCardsPossibleToPlay(int maxMana) {//?
+        return hand.values().stream()
+                .filter(c -> c.getCost() <= maxMana)
+                .collect(toList());
+    }
+
+    public List<Card> getSpellsPossibleToPlay(int maxMana) {//?
+        return hand.values().stream()
+                .filter(c -> c.getCost() <= maxMana && c.getType() == CardType.SPELL)
+                .collect(toList());
+    }
+    
+	public void addMonsterToTable(Monster monster) {
+        table.put(monster.getUuid(), monster);
+	}
 }

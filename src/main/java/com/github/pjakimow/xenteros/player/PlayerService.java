@@ -12,7 +12,7 @@ import static java.lang.String.format;
 @Component
 public class PlayerService {
 
-    private DeckProvider deckProvider;
+    protected DeckProvider deckProvider;
     private Scanner sc = new Scanner(System.in);
 
     @Autowired
@@ -65,7 +65,7 @@ public class PlayerService {
         black.drawCards(4);
     }
 
-    private void throwSpell(Spell spell, Player player, Player opponent) {
+    protected void throwSpell(Spell spell, Player player, Player opponent) {
         SpellAction spellAction = spell.getAction();
 
         switch (spellAction) {
@@ -125,4 +125,5 @@ public class PlayerService {
             opponent.receiveAttack(opponentTableToAttack.get(userChoice - 1).getUuid(), power);
         }
     }
+    
 }
