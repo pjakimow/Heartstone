@@ -8,20 +8,34 @@ import com.github.pjakimow.xenteros.player.Player;
 public class Node {
 	private List<Node> children = null;
 	private Node parent = null;
-	    
-	private Player player1;
-	private Player player2;
-
-	private int wins;
-	private int playouts;
+	private int visited, reward;
+	
+	private Player player1, player2;
 	
 	public Node(Player player1, Player player2){
 		this.player1 = player1;
 		this.player2 = player2;
-		wins = playouts = 0;
+		visited = reward = 0;
 		children = new ArrayList<Node>();
 	}
 
+	public Node getBestChild(double c){
+		Node result = null;
+		double best = 0, current = 0;
+		
+		for (Node child: children){
+			if (child.visited == 0)
+				return child;
+			current = child.reward / child.visited + (c * Math.sqrt(2 * Math.log(this.visited) / child.visited));
+			if ( current > best	){
+				result = child;
+				best = current;
+			}	
+		}
+		
+		return result;
+	}
+	
 	public boolean isRoot(){
 		return parent == null;
 	}
@@ -41,29 +55,21 @@ public class Node {
 		for ( Node child: children)
 			child.setParent(this);
 	}
-	 
+	
+	public void incrementReward() {
+		this.reward ++;
+	}
+	
+	public void incrementVisited() {
+		this.visited ++;
+	}
+	
 	public List<Node> getChildren() {
 		return children;
 	}
 
 	public Node getParent() {
 		return parent;
-	}
-
-	public int getWins() {
-		return wins;
-	}
-
-	public void setWins(int wins) {
-		this.wins = wins;
-	}
-
-	public int getPlayouts() {
-		return playouts;
-	}
-
-	public void setPlayouts(int playouts) {
-		this.playouts = playouts;
 	}
 
 	public Player getPlayer1() {
@@ -73,5 +79,13 @@ public class Node {
 	public Player getPlayer2() {
 		return player2;
 	}
+
+	public int getVisited() {
+		return visited;
+	}
+
+	public int getReward() {
+		return reward;
+	}	
 		
 }
