@@ -14,6 +14,10 @@ import com.github.pjakimow.xenteros.card.DeckProvider;
 import com.github.pjakimow.xenteros.card.Monster;
 import com.github.pjakimow.xenteros.card.Spell;
 import com.github.pjakimow.xenteros.card.SpellAction;
+import com.github.pjakimow.xenteros.game.GameManager;
+import com.github.pjakimow.xenteros.game.GameMode;
+import com.github.pjakimow.xenteros.mcts.Node;
+
 
 @Component
 public class AgressivePlayerService extends PlayerService{
@@ -27,14 +31,28 @@ public class AgressivePlayerService extends PlayerService{
         return new Player(1, deckProvider.getDeck());
     }
     
-    private void attackOpponent(int power, Player opponent) {
-    	if (!opponent.hasTaunt()){
-    		opponent.receiveAttack(power);
+    private void attackOpponent(int power, Node node) {
+    	if (!node.getOpponent().hasTaunt()){
+    		node.getOpponent().receiveAttack(power);
     	} else {
-            List<Monster> opponentTauntCards = opponent.getMonstersToAttack();
-            //TODO:which one to attack? now: randomly
-            int choice = (int) (Math.random() * opponentTauntCards.size());
-            opponent.receiveAttack(opponentTauntCards.get(choice).getUuid(), power);
+            List<Monster> opponentTauntCards = node.getOpponent().getMonstersToAttack();
+           
+            int choice = 0;//(int) (Math.random() * opponentTauntCards.size());
+            
+            if ( GameManager.getMode() == GameMode.EXPANSION){
+	            for (; choice < opponentTauntCards.size(); choice++){ //expansion
+	            	Node child = new Node(node.getPlayer(), node.getOpponent());
+	            	child.getOpponent().receiveAttack(opponentTauntCards.get(choice).getUuid(), power);
+	            	
+	            	node.addChild(child);
+	            }
+	            GameManager.setMode(GameMode.SIMULATION);
+	            //chose 1st
+	            node = node.getFirstChild(); 
+            } else if ( GameManager.getMode() == GameMode.SIMULATION){ 
+            	node.getOpponent().receiveAttack(opponentTauntCards.get(choice).getUuid(), power);             
+            }
+           
     	}
     }
     
@@ -74,25 +92,37 @@ public class AgressivePlayerService extends PlayerService{
     	
     }
     
-    public void move(Player player, Player opponent, int round) {
-        player.beginTurn(round);
+    public void move(Node node, int round) {
+        node.getPlayer().beginTurn(round);
         
         //first attack opponent
-        List<Monster> table = player.getTable();
+        List<Monster> table = node.getPlayer().getTable();
         for (Monster monster : table) {
-            attackOpponent(monster.getAttack(), opponent);//next state
+            attackOpponent(monster.getAttack(), node);
         }
         
         //then buy some cards
-        while (player.canPlayCard()) {
+        while (node.getPlayer().canPlayCard()) {
 
-        	Card choice = chooseCard(player);
+        	Card choice = chooseCard(node.getPlayer());
             if (choice == null) {
                 break;
             }
 
             try {
-                player.playCard(choice.getUuid());
+            	if ( GameManager.getMode() == GameMode.SIMULATION){
+            		node.getPlayer().playCard(choice.getUuid());
+            	} else if ( GameManager.getMode() == GameMode.EXPANSION){
+ 	            	Node child = new Node(node.getPlayer(), node.getOpponent());
+ 	            	child.getPlayer().playCard(choice.getUuid());
+ 	            	
+ 	            	node.addChild(child);
+     	      
+     	            GameManager.setMode(GameMode.SIMULATION);
+     	            //chose 1st
+     	            node = node.getFirstChild(); 
+            	}
+            	
             } catch (IllegalMoveException e) {
                 System.out.println("You already have 7 monsters on the table. Pick another one.");
                 continue;
@@ -101,12 +131,13 @@ public class AgressivePlayerService extends PlayerService{
             if (choice instanceof Monster) {
                 Monster monster = (Monster) choice;
                 
-                player.addMonsterToTable(monster);
+                node.getPlayer().addMonsterToTable(monster);
                 if (monster.hasCharge()) {
-                   attackOpponent(monster.getAttack(), opponent);///next state
+                   attackOpponent(monster.getAttack(), node); //buying and using a monster are diff actions
                 }
             } else {
-                throwSpell((Spell) choice, player, opponent);//next state
+                throwSpell((Spell) choice, node.getPlayer(), node.getOpponent()); 
+                //node changed by buying a spell
             }
         }
 

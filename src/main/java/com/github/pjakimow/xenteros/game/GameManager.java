@@ -14,22 +14,24 @@ import java.util.LinkedList;
 import java.util.List;
 
 @Component
-class GameManager {
+public class GameManager {
 
     //private PlayerService playerService;
     private AgressivePlayerService playerService;
     private Player white;
     private Player black;
     
-    private List<Node> tree;
-
+    public Node tree;
+    private static GameMode mode;
+    public static final double c = 1; //?
+    
     @Autowired
     public GameManager(AgressivePlayerService playerService) {
         this.playerService = playerService;
         this.white = playerService.createPlayer();
         this.black = playerService.createPlayer();
-        this.tree = new LinkedList<Node>();
-        tree.add(new Node(white, black));
+        this.tree = new Node(white, black);
+        this.mode = GameMode.SELECTION;
         //run();
         run2();
     }
@@ -66,6 +68,9 @@ class GameManager {
     private void run2() {
         playerService.setUp(white, black);
         int round = 1;
+        
+        selection(tree, c);
+        
         while (true) {
 //            System.out.println(format("--------ROUND %d--------",round));
 //            System.out.println(format(">>White (%d HP) move:", white.getHealth()));
@@ -75,9 +80,11 @@ class GameManager {
 //            black.printHand();
 //            black.printTable();
             try {
-                playerService.move(white, black, round);
+                playerService.move(tree, round);
             } catch (PlayerDeadException e) {
                 System.out.println("White won!");
+                mode = GameMode.BACKPROPAGATION;
+                backpropagation(tree);
                 return;
             }
 //            System.out.println("--------------");
@@ -88,12 +95,36 @@ class GameManager {
 //            white.printHand();
 //            white.printTable();
             try {
-                playerService.move(black, white, round);
+                playerService.move(black, white, round);//TODO
             } catch (PlayerDeadException e) {
                 System.out.println("Black won!");
+                mode = GameMode.BACKPROPAGATION;
+                backpropagation(tree);
                 return;
             }
             round++;
         }
     }
+
+	private void backpropagation(Node node) {
+		mode = GameMode.SELECTION;
+		selection(node, c);
+	}
+	
+	private void selection(Node node, double c){
+		 Node best = tree.getBestChild(c);
+	     if (best != null)
+	        tree = best;
+	     mode = GameMode.EXPANSION;
+	}
+
+	public static GameMode getMode() {
+		return mode;
+	}
+
+	public static void setMode(GameMode mode) {
+		GameManager.mode = mode;
+	}
+    
+    
 }

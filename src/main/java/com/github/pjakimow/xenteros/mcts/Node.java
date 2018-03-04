@@ -10,11 +10,11 @@ public class Node {
 	private Node parent = null;
 	private int visited, reward;
 	
-	private Player player1, player2;
+	private Player player, opponent;
 	
-	public Node(Player player1, Player player2){
-		this.player1 = player1;
-		this.player2 = player2;
+	public Node(Player player, Player opponent){
+		this.player = player;
+		this.opponent = opponent;
 		visited = reward = 0;
 		children = new ArrayList<Node>();
 	}
@@ -34,6 +34,10 @@ public class Node {
 		}
 		
 		return result;
+	}
+	
+	public Node getFirstChild(){		
+		return children.size() > 0 ? children.get(0) : null;
 	}
 	
 	public boolean isRoot(){
@@ -64,6 +68,15 @@ public class Node {
 		this.visited ++;
 	}
 	
+	public void addVictory() {
+		incrementReward();
+		incrementVisited();
+	}
+	
+	public void addLoss() {
+		incrementVisited();
+	}
+	
 	public List<Node> getChildren() {
 		return children;
 	}
@@ -72,12 +85,12 @@ public class Node {
 		return parent;
 	}
 
-	public Player getPlayer1() {
-		return player1;
+	public Player getPlayer() {
+		return player;
 	}
 
-	public Player getPlayer2() {
-		return player2;
+	public Player getOpponent() {
+		return opponent;
 	}
 
 	public int getVisited() {
