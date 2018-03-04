@@ -1,19 +1,11 @@
 package com.github.pjakimow.xenteros.player;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Scanner;
-
+import com.github.pjakimow.xenteros.card.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.github.pjakimow.xenteros.card.AttackCardComp;
-import com.github.pjakimow.xenteros.card.Card;
-import com.github.pjakimow.xenteros.card.DeckProvider;
-import com.github.pjakimow.xenteros.card.Monster;
-import com.github.pjakimow.xenteros.card.Spell;
-import com.github.pjakimow.xenteros.card.SpellAction;
+import java.util.Collections;
+import java.util.List;
 
 @Component
 public class AgressivePlayerService extends PlayerService{
@@ -61,16 +53,14 @@ public class AgressivePlayerService extends PlayerService{
     private Card chooseCard(Player player){
     	List<Card> cards;
     	
-    	if (player.getReadyTableSize() == 7){
+    	if (player.getReadyTableSize() + player.getUnreadyTableSize() >= 7){
     		cards = player.getSpellsPossibleToPlay(player.getMana());
     	} else {
         	cards = player.getCardsPossibleToPlay(player.getMana());
     	}
     	
     	Collections.sort(cards, new AttackCardComp());
-    	Card chosen = cards.size() > 0 ? cards.get(0) : null;
-    	//System.out.println("-Chosen: " + chosen);
-    	return chosen;
+    	return cards.size() > 0 ? cards.get(0) : null;
     	
     }
     
