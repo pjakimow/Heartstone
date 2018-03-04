@@ -22,7 +22,7 @@ public class Monster implements Card {
         this.monsterAbility = monsterAbility;
     }
 
-    static Monster fromMonster(Monster that) {
+    public static Monster fromMonster(Monster that) {
         return new Monster(that.getType(), that.getCost(), that.getAttack(), that.getHealth(), that.getMonsterAbility());
     }
 
@@ -85,7 +85,8 @@ public class Monster implements Card {
         return "Monster:" +
                 " C=" + cost +
                 ", A=" + attack +
-                ", H=" + health;
+                ", H=" + health +
+                ", ability=" + monsterAbility;
     }
     
 }

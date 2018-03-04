@@ -16,7 +16,7 @@ public class Spell implements Card {
         this.action = action;
     }
 
-    static Spell fromSpell(Spell that) {
+    public static Spell fromSpell(Spell that) {
         return new Spell(that.getType(), that.getCost(), that.getAction());
     }
 
