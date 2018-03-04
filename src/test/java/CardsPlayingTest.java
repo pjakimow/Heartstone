@@ -1,20 +1,15 @@
-import static org.junit.Assert.*;
-
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 import com.github.pjakimow.xenteros.card.Card;
 import com.github.pjakimow.xenteros.card.CardType;
 import com.github.pjakimow.xenteros.card.Monster;
 import com.github.pjakimow.xenteros.card.MonsterAbility;
-import com.github.pjakimow.xenteros.card.Spell;
-import com.github.pjakimow.xenteros.card.SpellAction;
 import com.github.pjakimow.xenteros.player.IllegalMoveException;
 import com.github.pjakimow.xenteros.player.Player;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 public class CardsPlayingTest {
 

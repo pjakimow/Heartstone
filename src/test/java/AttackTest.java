@@ -1,16 +1,15 @@
-import static org.junit.Assert.*;
-
-import java.util.LinkedList;
-import java.util.List;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 import com.github.pjakimow.xenteros.card.Card;
 import com.github.pjakimow.xenteros.card.CardType;
 import com.github.pjakimow.xenteros.card.Monster;
 import com.github.pjakimow.xenteros.card.MonsterAbility;
 import com.github.pjakimow.xenteros.player.Player;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.LinkedList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 
 public class AttackTest {
 
