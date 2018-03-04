@@ -13,6 +13,7 @@ import com.github.pjakimow.xenteros.card.Card;
 import com.github.pjakimow.xenteros.card.DeckProvider;
 import com.github.pjakimow.xenteros.card.Monster;
 import com.github.pjakimow.xenteros.card.Spell;
+import com.github.pjakimow.xenteros.card.SpellAction;
 
 @Component
 public class AgressivePlayerService extends PlayerService{
@@ -37,6 +38,26 @@ public class AgressivePlayerService extends PlayerService{
     	}
     }
     
+    private void throwSpell(Spell spell, Player player, Player opponent) {
+        SpellAction spellAction = spell.getAction();
+
+        switch (spellAction) {
+            case DEAL_1_DAMAGE_DRAW_1_CARD:
+                player.drawCards(1);
+            	opponent.receiveAttack(1);
+                break;
+            case DEAL_2_DAMAGE_RESTORE_2_HEALTH:
+                player.heal(2);
+            	opponent.receiveAttack(2);
+                break;
+            case DRAW_2_CARDS:
+                player.drawCards(2);
+                break;
+            default:
+                break;
+        }
+    }
+    
     private Card chooseCard(Player player){
     	List<Card> cards;
     	
@@ -47,8 +68,9 @@ public class AgressivePlayerService extends PlayerService{
     	}
     	
     	Collections.sort(cards, new AttackCardComp());
-    	
-    	return cards.size() > 0 ? cards.get(0) : null;
+    	Card chosen = cards.size() > 0 ? cards.get(0) : null;
+    	//System.out.println("-Chosen: " + chosen);
+    	return chosen;
     	
     }
     

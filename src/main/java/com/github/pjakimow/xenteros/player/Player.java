@@ -3,6 +3,7 @@ package com.github.pjakimow.xenteros.player;
 import com.github.pjakimow.xenteros.card.Card;
 import com.github.pjakimow.xenteros.card.CardType;
 import com.github.pjakimow.xenteros.card.Monster;
+import com.github.pjakimow.xenteros.card.Spell;
 
 import java.util.*;
 
@@ -26,7 +27,60 @@ public class Player {
         shuffle(cards);
         deck = new LinkedList<>(cards);
     }
-
+    
+    public Player(int mana) {
+        this.mana = mana;
+        deck = new LinkedList<>();
+    }
+    
+    static Player fromPlayer(Player that) {
+    	Player newPlayer = new Player(that.getMana());
+    	newPlayer.health = that.health;
+    	newPlayer.failedDrawAttempts = that.failedDrawAttempts;
+    	
+    	//copy hand
+    	List<Card> oldHand = that.getHand();
+    	Map<String, Card> newHand = new HashMap<>();
+    	Card newCard;
+    	for ( Card c : oldHand){
+    		if ( c instanceof Spell ){
+    			newCard = Spell.fromSpell((Spell) c);
+    			newHand.put(newCard.getUuid(), newCard);
+    		} else if (c instanceof Monster ) {
+    			newCard = Monster.fromMonster((Monster) c);
+    			newHand.put(newCard.getUuid(), newCard);
+    		}
+    	}
+    	newPlayer.hand = newHand;
+    	
+    	//copy table
+    	List<Monster> oldTable = that.getTable();
+    	Map<String, Monster> newTable = new HashMap<>();
+    	Monster newMonster;
+    	for ( Monster m : oldTable){
+    			newMonster = Monster.fromMonster(m);
+    			newHand.put(newMonster.getUuid(), newMonster);
+    	}
+    	newPlayer.table = newTable;
+    	
+    	//copy deck
+    	Queue<Card> oldDeck = that.getDeck();
+    	Queue<Card> newDeck = new LinkedList<>();
+    	Card temp;
+    	for ( Card c : oldDeck){
+    		if ( c instanceof Spell ){
+    			temp = Spell.fromSpell((Spell) c);
+    			newDeck.add(temp);
+    		} else if (c instanceof Monster ) {
+    			temp = Monster.fromMonster((Monster) c);
+    			newDeck.add(temp);;
+    		}
+    	}
+    	newPlayer.deck = newDeck;
+    	
+        return newPlayer;
+    }
+    
     public List<Card> getHand() {
         return hand.values().stream()
                 .collect(toList());
@@ -46,11 +100,11 @@ public class Player {
         return getTable();
     }
 
-    int getHealth() {
+    public int getHealth() {
         return health;
     }
 
-    int getMana() {
+    public int getMana() {
         return mana;
     }
 
@@ -170,4 +224,14 @@ public class Player {
 	public void addMonsterToTable(Monster monster) {
         table.put(monster.getUuid(), monster);
 	}
+
+	public Queue<Card> getDeck() {
+		return deck;
+	}
+
+	public int getFailedDrawAttempts() {
+		return failedDrawAttempts;
+	}
+	
+	
 }

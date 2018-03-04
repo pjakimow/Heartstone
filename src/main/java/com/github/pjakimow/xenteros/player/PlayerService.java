@@ -65,7 +65,7 @@ public class PlayerService {
         black.drawCards(4);
     }
 
-    protected void throwSpell(Spell spell, Player player, Player opponent) {
+    private void throwSpell(Spell spell, Player player, Player opponent) {
         SpellAction spellAction = spell.getAction();
 
         switch (spellAction) {
