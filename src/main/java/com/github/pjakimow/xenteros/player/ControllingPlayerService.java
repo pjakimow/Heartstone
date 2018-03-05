@@ -61,7 +61,7 @@ public class ControllingPlayerService extends PlayerService{
         	cards = player.getCardsPossibleToPlay(player.getMana());
     	}
     	System.out.println("controlling: " + cards.size());
-    	Collections.sort(cards, new AttackCardComp());
+    	Collections.sort(cards, new ControllCardComp());
     	return cards.size() > 0 ? cards.get(0) : null;
     	
     }
