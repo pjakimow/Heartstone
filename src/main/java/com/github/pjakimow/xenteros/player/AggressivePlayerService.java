@@ -8,10 +8,10 @@ import java.util.Collections;
 import java.util.List;
 
 @Component
-public class AgressivePlayerService extends PlayerService{
+public class AggressivePlayerService extends PlayerService{
 
     @Autowired
-    public AgressivePlayerService(DeckProvider deckProvider) {
+    public AggressivePlayerService(DeckProvider deckProvider) {
     	super(deckProvider);
     }
 

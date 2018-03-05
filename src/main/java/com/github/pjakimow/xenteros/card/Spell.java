@@ -44,5 +44,9 @@ public class Spell implements Card {
                 "C=" + cost +
                 ", A=" + action;
     }
-    
+
+    @Override
+    public Card deepCopy() {
+        return fromSpell(this);
+    }
 }

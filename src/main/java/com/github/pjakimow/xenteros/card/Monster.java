@@ -88,5 +88,9 @@ public class Monster implements Card {
                 ", H=" + health +
                 ", ability=" + monsterAbility;
     }
-    
+
+    @Override
+    public Card deepCopy() {
+        return fromMonster(this);
+    }
 }

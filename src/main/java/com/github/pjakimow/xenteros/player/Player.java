@@ -3,14 +3,16 @@ package com.github.pjakimow.xenteros.player;
 import com.github.pjakimow.xenteros.card.Card;
 import com.github.pjakimow.xenteros.card.CardType;
 import com.github.pjakimow.xenteros.card.Monster;
-import com.github.pjakimow.xenteros.card.Spell;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.github.pjakimow.xenteros.card.MonsterAbility.TAUNT;
 import static java.lang.Math.min;
 import static java.util.Collections.shuffle;
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 public class Player {
 
@@ -27,60 +29,32 @@ public class Player {
         shuffle(cards);
         deck = new LinkedList<>(cards);
     }
-    
+
     public Player(int mana) {
         this.mana = mana;
         deck = new LinkedList<>();
     }
-    
-    static Player fromPlayer(Player that) {
-    	Player newPlayer = new Player(that.getMana());
-    	newPlayer.health = that.health;
-    	newPlayer.failedDrawAttempts = that.failedDrawAttempts;
-    	
-    	//copy hand
-    	List<Card> oldHand = that.getHand();
-    	Map<String, Card> newHand = new HashMap<>();
-    	Card newCard;
-    	for ( Card c : oldHand){
-    		if ( c instanceof Spell ){
-    			newCard = Spell.fromSpell((Spell) c);
-    			newHand.put(newCard.getUuid(), newCard);
-    		} else if (c instanceof Monster ) {
-    			newCard = Monster.fromMonster((Monster) c);
-    			newHand.put(newCard.getUuid(), newCard);
-    		}
-    	}
-    	newPlayer.hand = newHand;
-    	
-    	//copy table
-    	List<Monster> oldTable = that.getTable();
-    	Map<String, Monster> newTable = new HashMap<>();
-    	Monster newMonster;
-    	for ( Monster m : oldTable){
-    			newMonster = Monster.fromMonster(m);
-    			newHand.put(newMonster.getUuid(), newMonster);
-    	}
-    	newPlayer.table = newTable;
-    	
-    	//copy deck
-    	Queue<Card> oldDeck = that.getDeck();
-    	Queue<Card> newDeck = new LinkedList<>();
-    	Card temp;
-    	for ( Card c : oldDeck){
-    		if ( c instanceof Spell ){
-    			temp = Spell.fromSpell((Spell) c);
-    			newDeck.add(temp);
-    		} else if (c instanceof Monster ) {
-    			temp = Monster.fromMonster((Monster) c);
-    			newDeck.add(temp);;
-    		}
-    	}
-    	newPlayer.deck = newDeck;
-    	
+
+    public Player deepCopy() {
+        Player newPlayer = new Player(this.getMana());
+        newPlayer.health = this.health;
+        newPlayer.failedDrawAttempts = this.failedDrawAttempts;
+
+        newPlayer.hand = this.getHand().stream()
+                .map(Card::deepCopy)
+                .collect(toMap(Card::getUuid, identity()));
+
+        newPlayer.table = this.getTable().stream()
+                .map(Monster::fromMonster)
+                .collect(toMap(Monster::getUuid, identity()));
+
+        newPlayer.deck = this.getDeck().stream()
+                .map(Card::deepCopy)
+                .collect(Collectors.toCollection(LinkedList::new));
+
         return newPlayer;
     }
-    
+
     public List<Card> getHand() {
         return hand.values().stream()
                 .collect(toList());
@@ -200,15 +174,15 @@ public class Player {
         System.out.println("Table:");
         table.values().forEach(System.out::println);
     }
-    
-    public int getReadyTableSize(){
-    	return table.size();
+
+    public int getReadyTableSize() {
+        return table.size();
     }
-    
-    public int getUnreadyTableSize(){
-    	return temp.size();
+
+    public int getUnreadyTableSize() {
+        return temp.size();
     }
-    
+
     public List<Card> getCardsPossibleToPlay(int maxMana) {//?
         return hand.values().stream()
                 .filter(c -> c.getCost() <= maxMana)
@@ -220,18 +194,12 @@ public class Player {
                 .filter(c -> c.getCost() <= maxMana && c.getType() == CardType.SPELL)
                 .collect(toList());
     }
-    
-	public void addMonsterToTable(Monster monster) {
+
+    public void addMonsterToTable(Monster monster) {
         table.put(monster.getUuid(), monster);
-	}
+    }
 
-	public Queue<Card> getDeck() {
-		return deck;
-	}
-
-	public int getFailedDrawAttempts() {
-		return failedDrawAttempts;
-	}
-	
-	
+    private Queue<Card> getDeck() {
+        return deck;
+    }
 }

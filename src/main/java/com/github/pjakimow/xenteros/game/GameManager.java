@@ -1,35 +1,26 @@
 package com.github.pjakimow.xenteros.game;
 
-import com.github.pjakimow.xenteros.player.AgressivePlayerService;
+import com.github.pjakimow.xenteros.player.AggressivePlayerService;
 import com.github.pjakimow.xenteros.player.Player;
 import com.github.pjakimow.xenteros.player.PlayerDeadException;
-import com.github.pjakimow.xenteros.player.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import com.github.pjakimow.xenteros.mcts.Node;
 
 import static java.lang.String.format;
-
-import java.util.LinkedList;
-import java.util.List;
 
 @Component
 class GameManager {
 
     //private PlayerService playerService;
-    private AgressivePlayerService playerService;
+    private AggressivePlayerService playerService;
     private Player white;
     private Player black;
-    
-    private List<Node> tree;
 
     @Autowired
-    public GameManager(AgressivePlayerService playerService) {
+    public GameManager(AggressivePlayerService playerService) {
         this.playerService = playerService;
         this.white = playerService.createPlayer();
         this.black = playerService.createPlayer();
-        this.tree = new LinkedList<Node>();
-        tree.add(new Node(white, black));
         //run();
         run2();
     }
