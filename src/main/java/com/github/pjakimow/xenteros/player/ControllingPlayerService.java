@@ -19,7 +19,7 @@ public class ControllingPlayerService extends PlayerService{
         return new Player(1, deckProvider.getDeck());
     }
     
-    private void attackOpponent(int power, Player opponent) {//ok
+    private void attackOpponent(int power, Player opponent) {
     	/** opponentMinionsCards contains only taunt cards 
     	 * or only standard cards if there are no cards with taunt **/
     	List<Monster> opponentMinionsCards = opponent.getMonstersToAttack();
@@ -32,7 +32,7 @@ public class ControllingPlayerService extends PlayerService{
     	}
     }
     
-    private void throwSpell(Spell spell, Player player, Player opponent) {//ok
+    private void throwSpell(Spell spell, Player player, Player opponent) {
         SpellAction spellAction = spell.getAction();
 
         switch (spellAction) {
@@ -61,7 +61,7 @@ public class ControllingPlayerService extends PlayerService{
         	cards = player.getCardsPossibleToPlay(player.getMana());
     	}
     	System.out.println("controlling: " + cards.size());
-    	Collections.sort(cards, new AttackCardComp());
+    	Collections.sort(cards, new ControllCardComp());
     	return cards.size() > 0 ? cards.get(0) : null;
     	
     }
