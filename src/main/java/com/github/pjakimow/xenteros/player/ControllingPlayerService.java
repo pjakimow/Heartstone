@@ -7,11 +7,11 @@ import org.springframework.stereotype.Component;
 import java.util.Collections;
 import java.util.List;
 
-@Component("agressive")
-public class AgressivePlayerService extends PlayerService{
+@Component("controlling")
+public class ControllingPlayerService extends PlayerService{
 
     @Autowired
-    public AgressivePlayerService(DeckProvider deckProvider) {
+    public ControllingPlayerService(DeckProvider deckProvider) {
     	super(deckProvider);
     }
 
@@ -20,13 +20,15 @@ public class AgressivePlayerService extends PlayerService{
     }
     
     private void attackOpponent(int power, Player opponent) {
-    	if (!opponent.hasTaunt()){
+    	/** opponentMinionsCards contains only taunt cards 
+    	 * or only standard cards if there are no cards with taunt **/
+    	List<Monster> opponentMinionsCards = opponent.getMonstersToAttack();
+    
+    	if (opponentMinionsCards.isEmpty()){ //there are no minions on table
     		opponent.receiveAttack(power);
-    	} else {
-            List<Monster> opponentTauntCards = opponent.getMonstersToAttack();
-            //TODO:which one to attack? now: randomly
-            int choice = (int) (Math.random() * opponentTauntCards.size());
-            opponent.receiveAttack(opponentTauntCards.get(choice).getUuid(), power);
+    	} else{
+    		int choice = (int) (Math.random() * opponentMinionsCards.size());
+            opponent.receiveAttack(opponentMinionsCards.get(choice).getUuid(), power);
     	}
     }
     
@@ -36,11 +38,11 @@ public class AgressivePlayerService extends PlayerService{
         switch (spellAction) {
             case DEAL_1_DAMAGE_DRAW_1_CARD:
                 player.drawCards(1);
-            	opponent.receiveAttack(1);
+                attackOpponent(1, opponent);
                 break;
             case DEAL_2_DAMAGE_RESTORE_2_HEALTH:
                 player.heal(2);
-            	opponent.receiveAttack(2);
+                attackOpponent(2, opponent);
                 break;
             case DRAW_2_CARDS:
                 player.drawCards(2);
@@ -58,7 +60,7 @@ public class AgressivePlayerService extends PlayerService{
     	} else {
         	cards = player.getCardsPossibleToPlay(player.getMana());
     	}
-    	System.out.println("agressive" + cards.size());
+    	System.out.println("controlling: " + cards.size());
     	Collections.sort(cards, new AttackCardComp());
     	return cards.size() > 0 ? cards.get(0) : null;
     	
@@ -67,16 +69,16 @@ public class AgressivePlayerService extends PlayerService{
     public void move(Player player, Player opponent, int round) {
         player.beginTurn(round);
         
-        //first attack opponent
+        //first attack minions
         List<Monster> table = player.getTable();
         for (Monster monster : table) {
-            attackOpponent(monster.getAttack(), opponent);//next state
+            attackOpponent(monster.getAttack(), opponent);
         }
         
         //then buy some cards
         while (player.canPlayCard()) {
 
-        	Card choice = chooseCard(player);
+        	Card choice = chooseCard(player); //is this strategy the same as for agressive player?
             if (choice == null) {
                 break;
             }
@@ -93,10 +95,10 @@ public class AgressivePlayerService extends PlayerService{
                 
                 player.addMonsterToTable(monster);
                 if (monster.hasCharge()) {
-                   attackOpponent(monster.getAttack(), opponent);///next state
+                   attackOpponent(monster.getAttack(), opponent);
                 }
             } else {
-                throwSpell((Spell) choice, player, opponent);//next state
+                throwSpell((Spell) choice, player, opponent);
             }
         }
 
