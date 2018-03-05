@@ -4,14 +4,13 @@ import com.github.pjakimow.xenteros.card.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
 import java.util.List;
 
-@Component("controlling")
-public class ControllingPlayerService extends PlayerService{
+@Component("random")
+public class RandomPlayerService extends PlayerService{
 
     @Autowired
-    public ControllingPlayerService(DeckProvider deckProvider) {
+    public RandomPlayerService(DeckProvider deckProvider) {
     	super(deckProvider);
     }
 
@@ -19,20 +18,27 @@ public class ControllingPlayerService extends PlayerService{
         return new Player(1, deckProvider.getDeck());
     }
     
-    private void attackOpponent(int power, Player opponent) {//ok
+    private void attackOpponent(int power, Player opponent) {
     	/** opponentMinionsCards contains only taunt cards 
     	 * or only standard cards if there are no cards with taunt **/
     	List<Monster> opponentMinionsCards = opponent.getMonstersToAttack();
     
     	if (opponentMinionsCards.isEmpty()){ //there are no minions on table
     		opponent.receiveAttack(power);
-    	} else{
-    		int choice = (int) (Math.random() * opponentMinionsCards.size());
+    	} else if (opponent.hasTaunt()){ //there is min one taunt
+            int choice = (int) (Math.random() * opponentMinionsCards.size());
             opponent.receiveAttack(opponentMinionsCards.get(choice).getUuid(), power);
-    	}
+        } else { //there are no taunts
+            int choice = (int) (Math.random() * opponentMinionsCards.size() + 1);
+
+            if ( choice == opponentMinionsCards.size())
+                opponent.receiveAttack(power);
+            else
+                opponent.receiveAttack(opponentMinionsCards.get(choice).getUuid(), power);
+        }
     }
     
-    private void throwSpell(Spell spell, Player player, Player opponent) {//ok
+    private void throwSpell(Spell spell, Player player, Player opponent) {
         SpellAction spellAction = spell.getAction();
 
         switch (spellAction) {
@@ -60,8 +66,8 @@ public class ControllingPlayerService extends PlayerService{
     	} else {
         	cards = player.getCardsPossibleToPlay(player.getMana());
     	}
-    	System.out.println("controlling: " + cards.size());
-    	Collections.sort(cards, new AttackCardComp());
+    	System.out.println("random: " + cards.size());
+    	//Collections.sort(cards, new AttackCardComp());
     	return cards.size() > 0 ? cards.get(0) : null;
     	
     }
@@ -69,7 +75,7 @@ public class ControllingPlayerService extends PlayerService{
     public void move(Player player, Player opponent, int round) {
         player.beginTurn(round);
         
-        //first attack minions
+        //first attack minions or hero
         List<Monster> table = player.getTable();
         for (Monster monster : table) {
             attackOpponent(monster.getAttack(), opponent);
