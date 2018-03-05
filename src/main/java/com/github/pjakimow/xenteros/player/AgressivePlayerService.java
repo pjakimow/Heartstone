@@ -59,7 +59,7 @@ public class AgressivePlayerService extends PlayerService{
         	cards = player.getCardsPossibleToPlay(player.getMana());
     	}
     	System.out.println("agressive" + cards.size());
-    	Collections.sort(cards, new AttackCardComp());
+    	Collections.sort(cards, new AttackCardComp2());
     	return cards.size() > 0 ? cards.get(0) : null;
     	
     }
