@@ -37,7 +37,7 @@ public class PlayerService {
             try {
                 player.playCard(userChoice.getUuid());
             } catch (IllegalMoveException e) {
-                System.out.println("You already have 7 monsters on the table. Pick another one.");
+               // System.out.println("You already have 7 monsters on the table. Pick another one.");
                 continue;
             }
 
