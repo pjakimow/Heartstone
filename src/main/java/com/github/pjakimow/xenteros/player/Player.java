@@ -3,6 +3,7 @@ package com.github.pjakimow.xenteros.player;
 import com.github.pjakimow.xenteros.card.Card;
 import com.github.pjakimow.xenteros.card.CardType;
 import com.github.pjakimow.xenteros.card.Monster;
+import com.google.common.collect.Sets;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -11,14 +12,13 @@ import static com.github.pjakimow.xenteros.card.MonsterAbility.TAUNT;
 import static java.lang.Math.min;
 import static java.util.Collections.shuffle;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.*;
 
 public class Player {
 
     private int health = 20;
     private int mana;
-    private Queue<Card> deck;
+    private LinkedList<Card> deck;
     private Map<String, Card> hand = new HashMap<>();
     private Set<Monster> temp = new HashSet<>();
     private Map<String, Monster> table = new HashMap<>();
@@ -60,7 +60,7 @@ public class Player {
                 .collect(toList());
     }
 
-    List<Monster> getTable() {
+    public List<Monster> getTable() {
         return table.values().stream()
                 .collect(toList());
     }
@@ -183,13 +183,13 @@ public class Player {
         return temp.size();
     }
 
-    public List<Card> getCardsPossibleToPlay(int maxMana) {//?
+    public List<Card> getCardsPossibleToPlay(int maxMana) {
         return hand.values().stream()
                 .filter(c -> c.getCost() <= maxMana)
                 .collect(toList());
     }
 
-    public List<Card> getSpellsPossibleToPlay(int maxMana) {//?
+    public List<Card> getSpellsPossibleToPlay(int maxMana) {
         return hand.values().stream()
                 .filter(c -> c.getCost() <= maxMana && c.getType() == CardType.SPELL)
                 .collect(toList());
@@ -199,7 +199,29 @@ public class Player {
         table.put(monster.getUuid(), monster);
     }
 
-    private Queue<Card> getDeck() {
+    public LinkedList<Card> getDeck() {
         return deck;
     }
+
+    public int getDeckSize() {
+        return deck.size();
+    }
+
+    public Card drawRandomCard() {
+        int r = (int)(Math.random()*deck.size());
+        Card c = deck.remove(r);
+        hand.put(c.getUuid(), c);
+        return c;
+    }
+
+    public Set<Set<Card>> getPossibleMoves() {
+        return Sets.powerSet(hand.values().stream()
+                .filter(c -> c.getCost() < this.mana)
+                .collect(toSet())).stream()
+                .filter(ss -> ss.stream().mapToInt(Card::getCost).sum() < this.mana)
+                .collect(toSet());
+    }
+
+
+
 }
