@@ -1,14 +1,16 @@
 package com.github.pjakimow.xenteros.mcts;
 
 import com.github.pjakimow.xenteros.card.Card;
+import com.github.pjakimow.xenteros.card.Monster;
+import com.github.pjakimow.xenteros.card.MonsterAbility;
 import com.github.pjakimow.xenteros.player.Player;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static java.util.Collections.shuffle;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 
 public class Node {
 
@@ -18,8 +20,8 @@ public class Node {
     private Player me, opponent;
     private MoveToMake moveToMake;
     private List<Card> possibleDraws;
-    private Set<Set<Card>> possiblePlays;
-    private Set<Pair> possibleAttacks;
+    private List<Set<Card>> possiblePlays;
+    private List<Pair> possibleAttacks;
 
     public Node(Player me, Player opponent, MoveToMake moveToMake) {
         this.me = me.deepCopy();
@@ -69,13 +71,13 @@ public class Node {
             case I_DRAW:
                 return getBestChildDraw(me);
             case I_PLAY:
-                break;
+                return getBestChildPlay(me);
             case I_ATTACK:
                 break;
             case HE_DRAWS:
                 return getBestChildDraw(opponent);
             case HE_PLAYS:
-                break;
+                return getBestChildPlay(opponent);
             case HE_ATTACKS:
                 break;
         }
@@ -84,10 +86,11 @@ public class Node {
 
     private Node getBestChildDraw(Player player) {
 
-        if (this.children.size() == player.getDeckSize()) {
+        if (this.possibleDraws.isEmpty()) {
             return getBestChild(Math.sqrt(2));
         }
-        Card c = player.drawRandomCard();
+        shuffle(this.possibleDraws);
+        Card c = this.possibleDraws.remove(0);
         Node n = new Node(me, opponent, moveToMake.next());
         n.setParent(this);
         this.addChild(n);
@@ -95,9 +98,15 @@ public class Node {
     }
 
     private Node getBestChildPlay(Player player) {
-//        if (this.children.size() == player.getHand().size())
-
-        return null;
+        if (this.possiblePlays.isEmpty()) {
+            return getBestChild(Math.sqrt(2));
+        }
+        shuffle(this.possiblePlays);
+        Set<Card> c = this.possiblePlays.remove(0);
+        Node n = new Node(me, opponent, moveToMake.next());
+        n.setParent(this);
+        this.addChild(n);
+        return n;
     }
 
     public boolean isRoot() {
@@ -124,11 +133,17 @@ public class Node {
             child.setParent(this);
     }
 
-    private Set<Pair> getPossibleAttacks(Player from, Player to) {
-        Set<Pair> collect = from.getTable().stream()
-                .flatMap(attacker -> to.getTable().stream().map(attackee -> new Pair(attacker, attackee)))
-                .collect(toSet());
-        collect.addAll(from.getTable().stream().map(c -> new Pair(c, null)).collect(toSet()));
+    private List<Pair> getPossibleAttacks(Player from, Player to) {
+        List<Monster> myTable = from.getTable();
+        List<Monster> hisTable = to.getMonstersToAttack();
+        List<int[]> combinations = new ArrayList<>();
+
+        List<Pair> collect = from.getTable().stream()
+                .flatMap(attacker -> to.getMonstersToAttack().stream().map(attackee -> new Pair(attacker, attackee)))
+                .collect(toList());
+        if (!collect.stream().anyMatch(  p -> p.getTo().getMonsterAbility() == MonsterAbility.TAUNT)) {
+            collect.addAll(from.getTable().stream().map(c -> new Pair(c, null)).collect(toList()));
+        }
         return collect;
     }
 

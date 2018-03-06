@@ -107,7 +107,7 @@ public class Player {
         return card;
     }
 
-    void receiveAttack(String uuid, int power) {
+    public void receiveAttack(String uuid, int power) {
         Monster attackedCard = table.get(uuid);
         attackedCard.receiveAttack(power);
 
@@ -116,7 +116,7 @@ public class Player {
         }
     }
 
-    void receiveAttack(int power) {
+    public void receiveAttack(int power) {
         this.health -= power;
         if (this.health <= 0) {
             throw new PlayerDeadException();
@@ -161,7 +161,7 @@ public class Player {
         temp.forEach(m -> table.put(m.getUuid(), m));
     }
 
-    void heal(int points) {
+    public void heal(int points) {
         health += points;
     }
 
@@ -214,14 +214,11 @@ public class Player {
         return c;
     }
 
-    public Set<Set<Card>> getPossibleMoves() {
+    public List<Set<Card>> getPossibleMoves() {
         return Sets.powerSet(hand.values().stream()
                 .filter(c -> c.getCost() < this.mana)
                 .collect(toSet())).stream()
                 .filter(ss -> ss.stream().mapToInt(Card::getCost).sum() < this.mana)
-                .collect(toSet());
+                .collect(toList());
     }
-
-
-
 }

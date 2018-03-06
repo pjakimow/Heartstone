@@ -1,13 +1,14 @@
 package com.github.pjakimow.xenteros.mcts;
 
 import com.github.pjakimow.xenteros.card.Card;
+import com.github.pjakimow.xenteros.card.Monster;
 
 class Pair {
 
     private Card from;
-    private Card to;
+    private Monster to;
 
-    public Pair(Card from, Card to) {
+    public Pair(Card from, Monster to) {
         this.from = from;
         this.to = to;
     }
@@ -16,7 +17,7 @@ class Pair {
         return from;
     }
 
-    public Card getTo() {
+    public Monster getTo() {
         return to;
     }
 }
