@@ -7,6 +7,6 @@ class Tree {
     private Node root;
 
     public Tree(Player me, Player he) {
-        this.root = new Node(me, he);
+        this.root = new Node(me, he, MoveToMake.I_PLAY);
     }
 }

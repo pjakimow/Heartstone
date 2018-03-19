@@ -38,6 +38,10 @@ public class Spell implements Card {
         return action;
     }
 
+    public boolean isOffensive() {
+        return action == SpellAction.DEAL_1_DAMAGE_DRAW_1_CARD || action == SpellAction.DEAL_2_DAMAGE_RESTORE_2_HEALTH;
+    }
+
     @Override
     public String toString() {
         return "Spell:" +

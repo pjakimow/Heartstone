@@ -1,14 +1,13 @@
 package com.github.pjakimow.xenteros.mcts;
 
-import com.github.pjakimow.xenteros.card.Card;
-import com.github.pjakimow.xenteros.card.Monster;
-import com.github.pjakimow.xenteros.card.MonsterAbility;
+import com.github.pjakimow.xenteros.card.*;
 import com.github.pjakimow.xenteros.player.Player;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static java.lang.Math.pow;
 import static java.util.Collections.shuffle;
 import static java.util.stream.Collectors.toList;
 
@@ -21,7 +20,7 @@ public class Node {
     private MoveToMake moveToMake;
     private List<Card> possibleDraws;
     private List<Set<Card>> possiblePlays;
-    private List<Pair> possibleAttacks;
+    private List<List<Pair>> possibleAttacks;
 
     public Node(Player me, Player opponent, MoveToMake moveToMake) {
         this.me = me.deepCopy();
@@ -33,7 +32,7 @@ public class Node {
                 this.possibleDraws = me.getDeck().stream().collect(toList());
                 break;
             case I_PLAY:
-                this.possiblePlays = me.getPossibleMoves();
+                this.possiblePlays = me.getPossiblePlays();
                 break;
             case I_ATTACK:
                 this.possibleAttacks = getPossibleAttacks(me, opponent);
@@ -42,7 +41,7 @@ public class Node {
                 this.possibleDraws = opponent.getDeck().stream().collect(toList());
                 break;
             case HE_PLAYS:
-                this.possiblePlays = opponent.getPossibleMoves();
+                this.possiblePlays = opponent.getPossiblePlays();
                 break;
             case HE_ATTACKS:
                 this.possibleAttacks = getPossibleAttacks(opponent, me);
@@ -73,13 +72,13 @@ public class Node {
             case I_PLAY:
                 return getBestChildPlay(me);
             case I_ATTACK:
-                break;
+                return getBestChildAttack(me, opponent);
             case HE_DRAWS:
                 return getBestChildDraw(opponent);
             case HE_PLAYS:
                 return getBestChildPlay(opponent);
             case HE_ATTACKS:
-                break;
+                return getBestChildAttack(opponent, me);
         }
         return null;
     }
@@ -94,6 +93,11 @@ public class Node {
         Node n = new Node(me, opponent, moveToMake.next());
         n.setParent(this);
         this.addChild(n);
+        if (moveToMake == MoveToMake.I_DRAW) {
+            n.getMe().drawCard(c);
+        } else {
+            n.getOpponent().drawCard(c);
+        }
         return n;
     }
 
@@ -106,7 +110,44 @@ public class Node {
         Node n = new Node(me, opponent, moveToMake.next());
         n.setParent(this);
         this.addChild(n);
+        for (Card card : c) {
+            player.playCard(card.getUuid());
+            if (card instanceof Spell) {
+                player.drawCards(2);
+            }
+        }
         return n;
+    }
+
+    private Node getBestChildAttack(Player from, Player to) {
+        if (this.possibleAttacks.isEmpty()) {
+            return getBestChild(Math.sqrt(2));
+        }
+        shuffle(this.possibleAttacks);
+        List<Pair> move = this.possibleAttacks.remove(0);
+        Node n = new Node(me, opponent, moveToMake.next());
+        n.setParent(this);
+        for (Pair pair : move) {
+            int power = 0;
+            if (pair.getFrom().getType() == CardType.MONSTER) {
+                power = ((Monster)pair.getFrom()).getAttack();
+            } else {
+                Spell spell = (Spell)pair.getFrom();
+                if (spell.getAction() == SpellAction.DEAL_1_DAMAGE_DRAW_1_CARD) {
+                    power = 1;
+                }
+                if (spell.getAction() == SpellAction.DEAL_2_DAMAGE_RESTORE_2_HEALTH) {
+                    power = 2;
+                }
+            }
+            if (pair.getTo() == null) {
+                to.receiveAttack(power);
+            } else {
+                to.receiveAttack(pair.getTo().getUuid(), power);
+            }
+        }
+        return n;
+
     }
 
     public boolean isRoot() {
@@ -133,18 +174,46 @@ public class Node {
             child.setParent(this);
     }
 
-    private List<Pair> getPossibleAttacks(Player from, Player to) {
-        List<Monster> myTable = from.getTable();
-        List<Monster> hisTable = to.getMonstersToAttack();
-        List<int[]> combinations = new ArrayList<>();
+    private List<List<Pair>> getPossibleAttacks(Player from, Player to) {
+        int base = to.getMonstersToAttack().size() + 1;
 
-        List<Pair> collect = from.getTable().stream()
-                .flatMap(attacker -> to.getMonstersToAttack().stream().map(attackee -> new Pair(attacker, attackee)))
-                .collect(toList());
-        if (!collect.stream().anyMatch(  p -> p.getTo().getMonsterAbility() == MonsterAbility.TAUNT)) {
-            collect.addAll(from.getTable().stream().map(c -> new Pair(c, null)).collect(toList()));
+        List<Card> cardsThatCanAttack = new ArrayList<>();
+        cardsThatCanAttack.addAll(from.getTable());
+        cardsThatCanAttack.addAll(from.getOffensiveCards());
+
+        int[] indexes = new int[cardsThatCanAttack.size()];
+
+        List<List<Pair>> result = new ArrayList<>();
+        int rounds = (int) pow(base, indexes.length);
+
+        for (int i = 0; i < rounds; i++) {
+            List<Pair> move = new ArrayList<>();
+            for (int j = 0; j < cardsThatCanAttack.size(); j++) {
+                move.add(new Pair(cardsThatCanAttack.get(j), getCardToPair(indexes, to.getMonstersToAttack(), j)));
+            }
+            if (move.stream()
+                    .filter(c -> c.getFrom().getType() == CardType.SPELL)
+                    .mapToInt(c -> c.getFrom().getCost())
+                    .sum() <= from.getMana()) {
+                result.add(move);
+            }
         }
-        return collect;
+
+        return result;
+    }
+
+    private Monster getCardToPair(int[] state, List<Monster> monsters, int i) {
+        return state[i] == monsters.size() ? null : monsters.get(state[i]);
+    }
+
+    private void increment(int[] array, int base) {
+        for (int i = 0; i < array.length - 1; i++) {
+            array[i] += 1;
+            if (array[i] >= base) {
+                array[i] = array[i] % base;
+                array[i + 1] += 1;
+            }
+        }
     }
 
     public void incrementReward() {
@@ -179,4 +248,7 @@ public class Node {
         return reward;
     }
 
+    public boolean isGameOver() {
+        return me.getHealth() <= 0 || opponent.getHealth() <= 0;
+    }
 }

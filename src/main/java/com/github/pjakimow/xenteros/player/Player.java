@@ -1,8 +1,6 @@
 package com.github.pjakimow.xenteros.player;
 
-import com.github.pjakimow.xenteros.card.Card;
-import com.github.pjakimow.xenteros.card.CardType;
-import com.github.pjakimow.xenteros.card.Monster;
+import com.github.pjakimow.xenteros.card.*;
 import com.google.common.collect.Sets;
 
 import java.util.*;
@@ -98,7 +96,12 @@ public class Player {
         }
 
         if (card instanceof Monster) {
-            temp.add((Monster) card);
+            Monster m = (Monster) card;
+            if (m.hasCharge()) {
+                table.put(m.getUuid(), m);
+            } else {
+                temp.add((Monster) card);
+            }
         }
 
         hand.remove(uuid);
@@ -203,22 +206,24 @@ public class Player {
         return deck;
     }
 
-    public int getDeckSize() {
-        return deck.size();
-    }
-
-    public Card drawRandomCard() {
-        int r = (int)(Math.random()*deck.size());
-        Card c = deck.remove(r);
-        hand.put(c.getUuid(), c);
-        return c;
-    }
-
-    public List<Set<Card>> getPossibleMoves() {
-        return Sets.powerSet(hand.values().stream()
-                .filter(c -> c.getCost() < this.mana)
-                .collect(toSet())).stream()
+    public List<Set<Card>> getPossiblePlays() {
+        return Sets.powerSet(hand.values().stream().filter(c -> c.getType() == CardType.MONSTER || (c.getType() == CardType.SPELL && ((Spell) c).getAction() == SpellAction.DRAW_2_CARDS)).collect(toSet()))
+                .stream()
                 .filter(ss -> ss.stream().mapToInt(Card::getCost).sum() < this.mana)
                 .collect(toList());
+    }
+
+    public List<Spell> getOffensiveCards() {
+        return hand.values().stream()
+                .filter(s -> s.getType() == CardType.SPELL)
+                .filter(s -> s.getCost() <= mana)
+                .map(c -> (Spell) c)
+                .filter(Spell::isOffensive)
+                .collect(Collectors.toList());
+    }
+
+    public void drawCard(Card c) {
+        this.deck.remove(c);
+        this.hand.put(c.getUuid(), c);
     }
 }
