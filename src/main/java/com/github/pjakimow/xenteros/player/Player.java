@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.github.pjakimow.xenteros.card.CardType.MONSTER;
 import static com.github.pjakimow.xenteros.card.MonsterAbility.TAUNT;
 import static java.lang.Math.min;
 import static java.util.Collections.shuffle;
@@ -80,7 +81,7 @@ public class Player {
         return mana;
     }
 
-    void beginTurn(int round) {
+    public void beginTurn(int round) {
         drawCards(1);
         setMana(round);
     }
@@ -112,6 +113,9 @@ public class Player {
 
     public void receiveAttack(String uuid, int power) {
         Monster attackedCard = table.get(uuid);
+        if (attackedCard == null) {
+            return;
+        }
         attackedCard.receiveAttack(power);
 
         if (attackedCard.getHealth() < 0) {
@@ -160,7 +164,7 @@ public class Player {
         table.put(monster.getUuid(), monster);
     }
 
-    void moveMonstersToTable() {
+    public void moveMonstersToTable() {
         temp.forEach(m -> table.put(m.getUuid(), m));
     }
 
@@ -207,9 +211,10 @@ public class Player {
     }
 
     public List<Set<Card>> getPossiblePlays() {
-        return Sets.powerSet(hand.values().stream().filter(c -> c.getType() == CardType.MONSTER || (c.getType() == CardType.SPELL && ((Spell) c).getAction() == SpellAction.DRAW_2_CARDS)).collect(toSet()))
+        return Sets.powerSet(hand.values().stream().filter(c -> c.getType() == MONSTER || (c.getType() == CardType.SPELL && ((Spell) c).getAction() == SpellAction.DRAW_2_CARDS)).collect(toSet()))
                 .stream()
                 .filter(ss -> ss.stream().mapToInt(Card::getCost).sum() < this.mana)
+                .filter(ss -> ss.stream().filter(c -> c.getType() == MONSTER).count() + this.table.size() <= 7)
                 .collect(toList());
     }
 
@@ -225,5 +230,9 @@ public class Player {
     public void drawCard(Card c) {
         this.deck.remove(c);
         this.hand.put(c.getUuid(), c);
+    }
+
+    public void shuffleDeck() {
+        Collections.shuffle(deck);
     }
 }

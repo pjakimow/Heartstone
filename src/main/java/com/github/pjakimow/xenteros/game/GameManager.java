@@ -1,8 +1,10 @@
 package com.github.pjakimow.xenteros.game;
 
+import com.github.pjakimow.xenteros.mcts.Tree;
 import com.github.pjakimow.xenteros.player.AggressivePlayerService;
 import com.github.pjakimow.xenteros.player.Player;
 import com.github.pjakimow.xenteros.player.PlayerDeadException;
+import com.github.pjakimow.xenteros.player.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,8 +13,8 @@ import static java.lang.String.format;
 @Component
 class GameManager {
 
-    //private PlayerService playerService;
-    private AggressivePlayerService playerService;
+    private PlayerService playerService;
+//    private AggressivePlayerService playerService;
     private Player white;
     private Player black;
 
@@ -22,7 +24,8 @@ class GameManager {
         this.white = playerService.createPlayer();
         this.black = playerService.createPlayer();
         //run();
-        run2();
+//        run2();
+        run3();
     }
 
     private void run() {
@@ -86,5 +89,11 @@ class GameManager {
             }
             round++;
         }
+    }
+
+    private void run3() {
+        playerService.setUp(white, black);
+        Tree mcts = new Tree(white, black, 1);
+        mcts.move(10);
     }
 }
