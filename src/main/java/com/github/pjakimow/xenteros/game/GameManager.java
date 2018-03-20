@@ -1,31 +1,36 @@
 package com.github.pjakimow.xenteros.game;
 
-import com.github.pjakimow.xenteros.mcts.Tree;
-import com.github.pjakimow.xenteros.player.AggressivePlayerService;
+import com.github.pjakimow.xenteros.mcts.Node;
+import com.github.pjakimow.xenteros.player.ControllingPlayerService;
 import com.github.pjakimow.xenteros.player.Player;
 import com.github.pjakimow.xenteros.player.PlayerDeadException;
-import com.github.pjakimow.xenteros.player.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.LinkedList;
+import java.util.List;
 
 import static java.lang.String.format;
 
 @Component
 class GameManager {
 
-    private PlayerService playerService;
-//    private AggressivePlayerService playerService;
+    //private PlayerService playerService;
+    private ControllingPlayerService playerService;
     private Player white;
     private Player black;
+    
+    private List<Node> tree;
 
     @Autowired
-    public GameManager(AggressivePlayerService playerService) {
+    public GameManager(ControllingPlayerService playerService) {
         this.playerService = playerService;
         this.white = playerService.createPlayer();
         this.black = playerService.createPlayer();
+        this.tree = new LinkedList<Node>();
+        tree.add(new Node(white, black));
         //run();
-//        run2();
-        run3();
+        run2();
     }
 
     private void run() {
@@ -61,11 +66,11 @@ class GameManager {
         playerService.setUp(white, black);
         int round = 1;
         while (true) {
-//            System.out.println(format("--------ROUND %d--------",round));
-//            System.out.println(format(">>White (%d HP) move:", white.getHealth()));
+            System.out.println(format("--------ROUND %d--------",round));
+            System.out.println(format(">>White (%d HP) move:", white.getHealth()));
 //            white.printHand();
 //            white.printTable();
-//            System.out.println(format(">Black (%d HP):", black.getHealth()));
+            System.out.println(format(">Black (%d HP):", black.getHealth()));
 //            black.printHand();
 //            black.printTable();
             try {
@@ -75,10 +80,10 @@ class GameManager {
                 return;
             }
 //            System.out.println("--------------");
-//            System.out.println(format(">>Black (%d HP) move:", black.getHealth()));
+            System.out.println(format(">>Black (%d HP) move:", black.getHealth()));
 //            black.printHand();
 //            black.printTable();
-//            System.out.println(format(">White (%d HP):", white.getHealth()));
+            System.out.println(format(">White (%d HP):", white.getHealth()));
 //            white.printHand();
 //            white.printTable();
             try {
@@ -89,11 +94,5 @@ class GameManager {
             }
             round++;
         }
-    }
-
-    private void run3() {
-        playerService.setUp(white, black);
-        Tree mcts = new Tree(white, black, 1);
-        mcts.move(10);
     }
 }
