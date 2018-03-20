@@ -166,6 +166,7 @@ public class Player {
 
     public void moveMonstersToTable() {
         temp.forEach(m -> table.put(m.getUuid(), m));
+        temp.clear();
     }
 
     public void heal(int points) {
@@ -234,5 +235,18 @@ public class Player {
 
     public void shuffleDeck() {
         Collections.shuffle(deck);
+    }
+
+    @Override
+    public String toString() {
+        return "Player{" +
+                "health=" + health +
+                ", mana=" + mana +
+                ", deck=" + deck.size() +
+                ", hand=" + hand.size() +
+                ", temp=" + temp.size() +
+                ", table=" + table.size() +
+                ", failedDrawAttempts=" + failedDrawAttempts +
+                '}';
     }
 }

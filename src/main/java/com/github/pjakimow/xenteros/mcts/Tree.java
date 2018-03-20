@@ -11,6 +11,7 @@ public class Tree {
     public Tree(Player me, Player he, int round) {
         this.me = me;
         this.opponent = he;
+        this.me.drawCards(1);
         this.root = new Node(me, he, MoveToMake.I_PLAY, round);
     }
 

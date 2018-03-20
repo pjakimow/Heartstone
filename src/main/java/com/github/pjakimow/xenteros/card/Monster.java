@@ -14,17 +14,22 @@ public class Monster implements Card {
     private int health;
     private MonsterAbility monsterAbility;
 
-    public Monster(CardType type, int cost, int attack, int health, MonsterAbility monsterAbility, String uuid) {
+    public Monster(CardType type, int cost, int attack, int health, MonsterAbility monsterAbility) {
         this.type = type;
         this.cost = cost;
         this.attack = attack;
         this.health = health;
         this.monsterAbility = monsterAbility;
-        this.uuid = uuid;
+    }
+
+    public Monster() {
+        this.uuid = UUID.randomUUID().toString();
     }
 
     public static Monster fromMonster(Monster that) {
-        return new Monster(that.getType(), that.getCost(), that.getAttack(), that.getHealth(), that.getMonsterAbility(), that.getUuid());
+        Monster newMonster = new Monster(that.getType(), that.getCost(), that.getAttack(), that.getHealth(), that.getMonsterAbility());
+        newMonster.uuid = that.getUuid();
+        return newMonster;
     }
 
     @Override

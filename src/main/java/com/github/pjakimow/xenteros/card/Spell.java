@@ -9,16 +9,22 @@ public class Spell implements Card {
     private int cost;
     private SpellAction action;
 
+    public Spell() {
+        this.uuid = UUID.randomUUID().toString();
+    }
 
-    public Spell(CardType type, int cost, SpellAction action, String uuid) {
+    public Spell(CardType type, int cost, SpellAction action) {
+        uuid = UUID.randomUUID().toString();
         this.type = type;
         this.cost = cost;
         this.action = action;
-        this.uuid = uuid;
     }
 
     public static Spell fromSpell(Spell that) {
-        return new Spell(that.getType(), that.getCost(), that.getAction(), that.getUuid());
+        Spell spell = new Spell(that.getType(), that.getCost(), that.getAction());
+        spell.uuid = that.getUuid();
+        return spell;
+
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.github.pjakimow.xenteros.mcts;
 
 import com.github.pjakimow.xenteros.card.*;
 import com.github.pjakimow.xenteros.player.Player;
+import com.github.pjakimow.xenteros.player.PlayerDeadException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,8 @@ public class Node {
     private int round;
 
     public Node(Player me, Player opponent, MoveToMake moveToMake, int round) {
+        System.out.println("Creating node with mtm: " + moveToMake);
+        System.out.println(me);
         this.me = me.deepCopy();
         this.opponent = opponent.deepCopy();
         visited = reward = 0;
@@ -165,6 +168,7 @@ public class Node {
                 to.receiveAttack(pair.getTo().getUuid(), power);
             }
         }
+        from.moveMonstersToTable();
         return n;
 
     }
@@ -305,7 +309,11 @@ public class Node {
                                 }
                             }
                             if (pair.getTo() == null) {
-                                opponent.receiveAttack(power);
+                                try{
+                                    opponent.receiveAttack(power);
+                                } catch (PlayerDeadException e) {
+                                    break;
+                                }
                             } else {
                                 opponent.receiveAttack(pair.getTo().getUuid(), power);
                             }
@@ -351,7 +359,11 @@ public class Node {
                                 }
                             }
                             if (pair.getTo() == null) {
-                                me.receiveAttack(power);
+                                try{
+                                    me.receiveAttack(power);
+                                } catch (PlayerDeadException e) {
+                                    break;
+                                }
                             } else {
                                 me.receiveAttack(pair.getTo().getUuid(), power);
                             }
@@ -378,6 +390,7 @@ public class Node {
             } else {
                 n.reward += won ? 0 : 1;
             }
+            n = n.parent;
         }
     }
 
