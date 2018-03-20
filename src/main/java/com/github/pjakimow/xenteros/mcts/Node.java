@@ -263,7 +263,9 @@ public class Node {
         MoveToMake state = this.moveToMake;
         while (me.getHealth() > 0 && opponent.getHealth() > 0) {
             System.out.println(me.getHealth() + " " + opponent.getHealth());
-                switch (state) {
+            System.out.println("me: " + me);
+            System.out.println("opponent: " + opponent);
+            switch (state) {
                     case I_DRAW:
                         round++;
                         me.beginTurn(round);
