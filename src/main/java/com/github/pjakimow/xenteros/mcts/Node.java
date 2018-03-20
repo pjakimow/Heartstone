@@ -113,7 +113,6 @@ public class Node {
         shuffle(this.possibleDraws);
         Card c = this.possibleDraws.remove(0);
         Node n = new Node(me, opponent, moveToMake.next(), this.round);
-        addChild(n);
         this.addChild(n);
         if (moveToMake == MoveToMake.I_DRAW) {
             n.getMe().drawCard(c);
@@ -130,7 +129,6 @@ public class Node {
         shuffle(this.possiblePlays);
         Set<Card> c = this.possiblePlays.remove(0);
         Node n = new Node(me, opponent, moveToMake.next(), this.round);
-        addChild(n);
         this.addChild(n);
         for (Card card : c) {
             player.playCard(card.getUuid());
@@ -402,4 +400,8 @@ public class Node {
                 ", moveToMake=" + moveToMake +
                 '}';
     }
+
+	public double winRatio() {
+		return 1.0*reward/visited;
+	}
 }

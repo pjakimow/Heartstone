@@ -23,6 +23,13 @@ public class Tree {
         }
 
         System.out.println(root.getChildren());
-
+        double bestWay = 0;
+        Node best = null;
+        for (Node node : root.getChildren()) {
+            if (node.winRatio() > bestWay) {
+                bestWay = node.winRatio();
+                best = node;
+            }
+        }
     }
 }
