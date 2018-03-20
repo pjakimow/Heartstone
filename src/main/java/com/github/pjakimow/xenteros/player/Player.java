@@ -166,6 +166,7 @@ public class Player {
 
     public void moveMonstersToTable() {
         temp.forEach(m -> table.put(m.getUuid(), m));
+        temp.clear();
     }
 
     public void heal(int points) {
