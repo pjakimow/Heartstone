@@ -62,11 +62,15 @@ public class Node {
             if (child.visited == 0)
                 return child;
             current = child.reward / child.visited + (c * Math.sqrt(2 * Math.log(this.visited) / child.visited));
-            if (current > best) {
+            if (current >= best) {
                 result = child;
                 best = current;
             }
         }
+
+        if (children.isEmpty()) {
+        	return new Node(me, opponent, moveToMake.next(), round);
+		}
 
         MoveToMake nextMove = moveToMake.next();
         switch (nextMove) {

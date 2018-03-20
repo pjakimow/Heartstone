@@ -26,10 +26,14 @@ public class Tree {
         double bestWay = 0;
         Node best = null;
         for (Node node : root.getChildren()) {
-            if (node.winRatio() > bestWay) {
-                bestWay = node.winRatio();
-                best = node;
+            for (Node grandChild : node.getChildren()) {
+
+                if (grandChild.winRatio() > bestWay) {
+                    bestWay = grandChild.winRatio();
+                    best = grandChild;
+                }
             }
         }
+        System.out.println(best);
     }
 }
