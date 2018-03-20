@@ -1,22 +1,23 @@
 package com.github.pjakimow.xenteros.player;
 
-import com.github.pjakimow.xenteros.card.Card;
-import com.github.pjakimow.xenteros.card.CardType;
-import com.github.pjakimow.xenteros.card.Monster;
-import com.github.pjakimow.xenteros.card.Spell;
+import com.github.pjakimow.xenteros.card.*;
+import com.google.common.collect.Sets;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
+import static com.github.pjakimow.xenteros.card.CardType.MONSTER;
 import static com.github.pjakimow.xenteros.card.MonsterAbility.TAUNT;
 import static java.lang.Math.min;
 import static java.util.Collections.shuffle;
-import static java.util.stream.Collectors.toList;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.*;
 
 public class Player {
 
     private int health = 20;
     private int mana;
-    private Queue<Card> deck;
+    private LinkedList<Card> deck;
     private Map<String, Card> hand = new HashMap<>();
     private Set<Monster> temp = new HashSet<>();
     private Map<String, Monster> table = new HashMap<>();
@@ -27,66 +28,38 @@ public class Player {
         shuffle(cards);
         deck = new LinkedList<>(cards);
     }
-    
+
     public Player(int mana) {
         this.mana = mana;
         deck = new LinkedList<>();
     }
-    
-    static Player fromPlayer(Player that) {
-    	Player newPlayer = new Player(that.getMana());
-    	newPlayer.health = that.health;
-    	newPlayer.failedDrawAttempts = that.failedDrawAttempts;
-    	
-    	//copy hand
-    	List<Card> oldHand = that.getHand();
-    	Map<String, Card> newHand = new HashMap<>();
-    	Card newCard;
-    	for ( Card c : oldHand){
-    		if ( c instanceof Spell ){
-    			newCard = Spell.fromSpell((Spell) c);
-    			newHand.put(newCard.getUuid(), newCard);
-    		} else if (c instanceof Monster ) {
-    			newCard = Monster.fromMonster((Monster) c);
-    			newHand.put(newCard.getUuid(), newCard);
-    		}
-    	}
-    	newPlayer.hand = newHand;
-    	
-    	//copy table
-    	List<Monster> oldTable = that.getTable();
-    	Map<String, Monster> newTable = new HashMap<>();
-    	Monster newMonster;
-    	for ( Monster m : oldTable){
-    			newMonster = Monster.fromMonster(m);
-    			newHand.put(newMonster.getUuid(), newMonster);
-    	}
-    	newPlayer.table = newTable;
-    	
-    	//copy deck
-    	Queue<Card> oldDeck = that.getDeck();
-    	Queue<Card> newDeck = new LinkedList<>();
-    	Card temp;
-    	for ( Card c : oldDeck){
-    		if ( c instanceof Spell ){
-    			temp = Spell.fromSpell((Spell) c);
-    			newDeck.add(temp);
-    		} else if (c instanceof Monster ) {
-    			temp = Monster.fromMonster((Monster) c);
-    			newDeck.add(temp);;
-    		}
-    	}
-    	newPlayer.deck = newDeck;
-    	
+
+    public Player deepCopy() {
+        Player newPlayer = new Player(this.getMana());
+        newPlayer.health = this.health;
+        newPlayer.failedDrawAttempts = this.failedDrawAttempts;
+
+        newPlayer.hand = this.getHand().stream()
+                .map(Card::deepCopy)
+                .collect(toMap(Card::getUuid, identity()));
+
+        newPlayer.table = this.getTable().stream()
+                .map(Monster::fromMonster)
+                .collect(toMap(Monster::getUuid, identity()));
+
+        newPlayer.deck = this.getDeck().stream()
+                .map(Card::deepCopy)
+                .collect(Collectors.toCollection(LinkedList::new));
+
         return newPlayer;
     }
-    
+
     public List<Card> getHand() {
         return hand.values().stream()
                 .collect(toList());
     }
 
-    List<Monster> getTable() {
+    public List<Monster> getTable() {
         return table.values().stream()
                 .collect(toList());
     }
@@ -108,7 +81,7 @@ public class Player {
         return mana;
     }
 
-    void beginTurn(int round) {
+    public void beginTurn(int round) {
         drawCards(1);
         setMana(round);
     }
@@ -124,7 +97,12 @@ public class Player {
         }
 
         if (card instanceof Monster) {
-            temp.add((Monster) card);
+            Monster m = (Monster) card;
+            if (m.hasCharge()) {
+                table.put(m.getUuid(), m);
+            } else {
+                temp.add((Monster) card);
+            }
         }
 
         hand.remove(uuid);
@@ -133,8 +111,11 @@ public class Player {
         return card;
     }
 
-    void receiveAttack(String uuid, int power) {
+    public void receiveAttack(String uuid, int power) {
         Monster attackedCard = table.get(uuid);
+        if (attackedCard == null) {
+            return;
+        }
         attackedCard.receiveAttack(power);
 
         if (attackedCard.getHealth() < 0) {
@@ -142,7 +123,7 @@ public class Player {
         }
     }
 
-    void receiveAttack(int power) {
+    public void receiveAttack(int power) {
         this.health -= power;
         if (this.health <= 0) {
             throw new PlayerDeadException();
@@ -183,11 +164,12 @@ public class Player {
         table.put(monster.getUuid(), monster);
     }
 
-    void moveMonstersToTable() {
+    public void moveMonstersToTable() {
         temp.forEach(m -> table.put(m.getUuid(), m));
+        temp.clear();
     }
 
-    void heal(int points) {
+    public void heal(int points) {
         health += points;
     }
 
@@ -200,38 +182,71 @@ public class Player {
         System.out.println("Table:");
         table.values().forEach(System.out::println);
     }
-    
-    public int getReadyTableSize(){
-    	return table.size();
+
+    public int getReadyTableSize() {
+        return table.size();
     }
-    
-    public int getUnreadyTableSize(){
-    	return temp.size();
+
+    public int getUnreadyTableSize() {
+        return temp.size();
     }
-    
-    public List<Card> getCardsPossibleToPlay(int maxMana) {//?
+
+    public List<Card> getCardsPossibleToPlay(int maxMana) {
         return hand.values().stream()
                 .filter(c -> c.getCost() <= maxMana)
                 .collect(toList());
     }
 
-    public List<Card> getSpellsPossibleToPlay(int maxMana) {//?
+    public List<Card> getSpellsPossibleToPlay(int maxMana) {
         return hand.values().stream()
                 .filter(c -> c.getCost() <= maxMana && c.getType() == CardType.SPELL)
                 .collect(toList());
     }
-    
-	public void addMonsterToTable(Monster monster) {
+
+    public void addMonsterToTable(Monster monster) {
         table.put(monster.getUuid(), monster);
-	}
+    }
 
-	public Queue<Card> getDeck() {
-		return deck;
-	}
+    public LinkedList<Card> getDeck() {
+        return deck;
+    }
 
-	public int getFailedDrawAttempts() {
-		return failedDrawAttempts;
-	}
-	
-	
+    public List<Set<Card>> getPossiblePlays() {
+        return Sets.powerSet(hand.values().stream().filter(c -> c.getType() == MONSTER || (c.getType() == CardType.SPELL && ((Spell) c).getAction() == SpellAction.DRAW_2_CARDS)).collect(toSet()))
+                .stream()
+                .filter(ss -> ss.stream().mapToInt(Card::getCost).sum() < this.mana)
+                .filter(ss -> ss.stream().filter(c -> c.getType() == MONSTER).count() + this.table.size() <= 7)
+                .collect(toList());
+    }
+
+    public List<Spell> getOffensiveCards() {
+        return hand.values().stream()
+                .filter(s -> s.getType() == CardType.SPELL)
+                .filter(s -> s.getCost() <= mana)
+                .map(c -> (Spell) c)
+                .filter(Spell::isOffensive)
+                .collect(Collectors.toList());
+    }
+
+    public void drawCard(Card c) {
+        this.deck.remove(c);
+        this.hand.put(c.getUuid(), c);
+    }
+
+    public void shuffleDeck() {
+        Collections.shuffle(deck);
+    }
+
+    @Override
+    public String toString() {
+        return "Player{" +
+                "health=" + health +
+                ", mana=" + mana +
+                ", deck=" + deck.size() +
+                ", hand=" + hand.size() +
+                ", temp=" + temp.size() +
+                ", table=" + table.size() +
+                ", failedDrawAttempts=" + failedDrawAttempts +
+                '}';
+    }
 }

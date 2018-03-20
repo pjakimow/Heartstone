@@ -5,4 +5,5 @@ public interface Card {
     CardType getType();
     int getCost();
     String getUuid();
+    Card deepCopy();
 }

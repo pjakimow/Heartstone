@@ -22,8 +22,14 @@ public class Monster implements Card {
         this.monsterAbility = monsterAbility;
     }
 
+    public Monster() {
+        this.uuid = UUID.randomUUID().toString();
+    }
+
     public static Monster fromMonster(Monster that) {
-        return new Monster(that.getType(), that.getCost(), that.getAttack(), that.getHealth(), that.getMonsterAbility());
+        Monster newMonster = new Monster(that.getType(), that.getCost(), that.getAttack(), that.getHealth(), that.getMonsterAbility());
+        newMonster.uuid = that.getUuid();
+        return newMonster;
     }
 
     @Override
@@ -88,5 +94,9 @@ public class Monster implements Card {
                 ", H=" + health +
                 ", ability=" + monsterAbility;
     }
-    
+
+    @Override
+    public Card deepCopy() {
+        return fromMonster(this);
+    }
 }

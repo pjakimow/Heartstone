@@ -1,14 +1,11 @@
 package com.github.pjakimow.xenteros.game;
 
-import com.github.pjakimow.xenteros.mcts.Node;
+import com.github.pjakimow.xenteros.mcts.Tree;
 import com.github.pjakimow.xenteros.player.ControllingPlayerService;
 import com.github.pjakimow.xenteros.player.Player;
 import com.github.pjakimow.xenteros.player.PlayerDeadException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.LinkedList;
-import java.util.List;
 
 import static java.lang.String.format;
 
@@ -19,18 +16,15 @@ class GameManager {
     private ControllingPlayerService playerService;
     private Player white;
     private Player black;
-    
-    private List<Node> tree;
 
     @Autowired
     public GameManager(ControllingPlayerService playerService) {
         this.playerService = playerService;
         this.white = playerService.createPlayer();
         this.black = playerService.createPlayer();
-        this.tree = new LinkedList<Node>();
-        tree.add(new Node(white, black));
         //run();
-        run2();
+//        run2();
+        run3();
     }
 
     private void run() {
@@ -94,5 +88,11 @@ class GameManager {
             }
             round++;
         }
+    }
+
+    private void run3() {
+        playerService.setUp(white, black);
+        Tree tree = new Tree(white, black, 1);
+        tree.move(10);
     }
 }
