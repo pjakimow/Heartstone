@@ -218,12 +218,18 @@ public class Node {
 
         List<Card> cardsThatCanAttack = new ArrayList<>();
         cardsThatCanAttack.addAll(from.getTable());
-        cardsThatCanAttack.addAll(from.getOffensiveCards());
+        cardsThatCanAttack.addAll(from.getOffensiveAffordableSpells());
 
-        int[] indexes = new int[cardsThatCanAttack.size()];
+        int[] indexes = new int[cardsThatCanAttack.size() + 1];
 
         List<List<Pair>> result = new ArrayList<>();
-        int rounds = (int) pow(base, indexes.length);
+        int rounds = (int) pow(base, cardsThatCanAttack.size());
+
+        if(from.getTable().stream().mapToInt(Monster::getAttack).sum() >= to.getHealth()) {
+            List<Pair> move = from.getTable().stream().map(m -> new Pair(m, null)).collect(toList());
+            result.add(move);
+            return result;
+        }
 
         for (int i = 0; i < rounds; i++) {
             List<Pair> move = new ArrayList<>();
@@ -236,13 +242,14 @@ public class Node {
                     .sum() <= from.getMana()) {
                 result.add(move);
             }
+            increment(indexes, base);
         }
 
         return result;
     }
 
-    private Monster getCardToPair(int[] state, List<Monster> monsters, int i) {
-        return state[i] == monsters.size() ? null : monsters.get(state[i]);
+    private Monster getCardToPair(int[] indexes, List<Monster> opponentsTable, int j) {
+        return indexes[j] == opponentsTable.size() ? null : opponentsTable.get(indexes[j]);
     }
 
     private void increment(int[] array, int base) {
@@ -289,12 +296,12 @@ public class Node {
 
 
     public void simulate() {
+        long start = System.currentTimeMillis();
         int round = this.round;
         Player me = this.me.deepCopy();
         Player opponent = this.opponent.deepCopy();
         MoveToMake state = this.moveToMake;
         while (me.getHealth() > 0 && opponent.getHealth() > 0) {
-//            System.out.println(me.getHealth() + " " + opponent.getHealth());
             switch (state) {
                 case I_DRAW:
                     round++;

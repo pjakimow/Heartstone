@@ -27,7 +27,9 @@ class GameManager {
 
         for (int i = 0; i < 1; i++) {
             this.white = playerService.createPlayer();
+            white.setName("WHITE");
             this.black = playerService.createPlayer();
+            black.setName("BLACK");
             run3();
         }
     }

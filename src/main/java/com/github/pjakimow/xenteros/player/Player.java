@@ -22,6 +22,7 @@ public class Player {
     private Set<Monster> temp = new HashSet<>();
     private Map<String, Monster> table = new HashMap<>();
     private int failedDrawAttempts = 0;
+    private String name;
 
     public Player(int mana, List<Card> cards) {
         this.mana = mana;
@@ -32,6 +33,10 @@ public class Player {
     public Player(int mana) {
         this.mana = mana;
         deck = new LinkedList<>();
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Player deepCopy() {
@@ -51,6 +56,7 @@ public class Player {
                 .map(Card::deepCopy)
                 .collect(Collectors.toCollection(LinkedList::new));
         newPlayer.temp = this.temp.stream().map(Monster::fromMonster).collect(Collectors.toSet());
+        newPlayer.name = this.name;
 
         return newPlayer;
     }
@@ -213,14 +219,18 @@ public class Player {
     }
 
     public List<Set<Card>> getPossiblePlays() {
-        return Sets.powerSet(hand.values().stream().filter(c -> c.getType() == MONSTER || (c.getType() == CardType.SPELL && ((Spell) c).getAction() == SpellAction.DRAW_2_CARDS)).collect(toSet()))
+        List<Set<Card>> plays = Sets.powerSet(hand.values().stream().filter(c -> c.getType() == MONSTER || (c.getType() == CardType.SPELL && ((Spell) c).getAction() == SpellAction.DRAW_2_CARDS)).collect(toSet()))
                 .stream()
                 .filter(ss -> ss.stream().mapToInt(Card::getCost).sum() <= this.mana)
                 .filter(ss -> ss.stream().filter(c -> c.getType() == MONSTER).count() + this.table.size() <= 7)
                 .collect(toList());
+        if (plays.size() > 0) {
+            plays.removeIf(Set::isEmpty);
+        }
+        return plays;
     }
 
-    public List<Spell> getOffensiveCards() {
+    public List<Spell> getOffensiveAffordableSpells() {
         return hand.values().stream()
                 .filter(s -> s.getType() == CardType.SPELL)
                 .filter(s -> s.getCost() <= mana)
@@ -243,6 +253,7 @@ public class Player {
         return "Player{" +
                 "health=" + health +
                 ", mana=" + mana +
+                ", name=" + name +
                 ", deck=" + deck.size() +
                 ", hand=" + hand.size() +
                 ", temp=" + temp.size() +
