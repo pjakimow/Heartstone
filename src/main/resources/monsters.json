@@ -7,13 +7,13 @@
   },
   {
     "type": "MONSTER",
-    "cost": 2,
+    "cost": 1,
     "attack": 3,
     "health": 6
   },
   {
     "type": "MONSTER",
-    "cost": 3,
+    "cost": 1,
     "attack": 4,
     "health": 7
   },

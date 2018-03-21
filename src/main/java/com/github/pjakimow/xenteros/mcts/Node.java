@@ -1,6 +1,7 @@
 package com.github.pjakimow.xenteros.mcts;
 
 import com.github.pjakimow.xenteros.card.*;
+import com.github.pjakimow.xenteros.player.IllegalMoveException;
 import com.github.pjakimow.xenteros.player.Player;
 import com.github.pjakimow.xenteros.player.PlayerDeadException;
 
@@ -25,8 +26,8 @@ public class Node {
     private int round;
 
     public Node(Player me, Player opponent, MoveToMake moveToMake, int round) {
-        System.out.println("Creating node with mtm: " + moveToMake);
-        System.out.println(me);
+//        System.out.println("Creating node with mtm: " + moveToMake);
+//        System.out.println(me);
         this.me = me.deepCopy();
         this.opponent = opponent.deepCopy();
         visited = reward = 0;
@@ -69,8 +70,10 @@ public class Node {
         }
 
         if (children.isEmpty()) {
-        	return new Node(me, opponent, moveToMake.next(), round);
-		}
+            Node n = new Node(me, opponent, moveToMake.next(), round);
+            addChild(n);
+            return n;
+        }
 
         MoveToMake nextMove = moveToMake.next();
         switch (nextMove) {
@@ -134,12 +137,22 @@ public class Node {
         Set<Card> c = this.possiblePlays.remove(0);
         Node n = new Node(me, opponent, moveToMake.next(), this.round);
         this.addChild(n);
+
+        if (moveToMake == MoveToMake.I_PLAY) {
+            player = n.me;
+        } else {
+            player = n.opponent;
+        }
+
         for (Card card : c) {
-            player.playCard(card.getUuid());
+            try{
+                player.playCard(card.getUuid());
+            }catch (IllegalMoveException e){}
             if (card instanceof Spell) {
                 player.drawCards(2);
             }
         }
+
         return n;
     }
 
@@ -151,6 +164,15 @@ public class Node {
         List<Pair> move = this.possibleAttacks.remove(0);
         Node n = new Node(me, opponent, moveToMake.next(), this.round);
         addChild(n);
+
+        if (moveToMake == MoveToMake.I_ATTACK) {
+            from = n.me;
+            to = n.opponent;
+        } else {
+            from = n.opponent;
+            to = n.me;
+        }
+
         for (Pair pair : move) {
             int power = 0;
             if (pair.getFrom().getType() == CardType.MONSTER) {
@@ -165,7 +187,11 @@ public class Node {
                 }
             }
             if (pair.getTo() == null) {
-                to.receiveAttack(power);
+                try {
+                    to.receiveAttack(power);
+                } catch (PlayerDeadException e) {
+
+                }
             } else {
                 to.receiveAttack(pair.getTo().getUuid(), power);
             }
@@ -268,111 +294,114 @@ public class Node {
         Player opponent = this.opponent.deepCopy();
         MoveToMake state = this.moveToMake;
         while (me.getHealth() > 0 && opponent.getHealth() > 0) {
-            System.out.println(me.getHealth() + " " + opponent.getHealth());
-                switch (state) {
-                    case I_DRAW:
-                        round++;
-                        me.beginTurn(round);
-                        me.shuffleDeck();
-                        me.drawCards(1);
+//            System.out.println(me.getHealth() + " " + opponent.getHealth());
+            switch (state) {
+                case I_DRAW:
+                    round++;
+                    me.beginTurn(round);
+                    me.shuffleDeck();
+                    me.drawCards(1);
+                    break;
+                case I_PLAY:
+                    List<Set<Card>> possiblePlays = me.getPossiblePlays();
+                    shuffle(possiblePlays);
+                    if (possiblePlays.isEmpty()) {
                         break;
-                    case I_PLAY:
-                        List<Set<Card>> possiblePlays = me.getPossiblePlays();
-                        shuffle(possiblePlays);
-                        if (possiblePlays.isEmpty()) {
-                            break;
+                    }
+                    for (Card card : possiblePlays.get(0)) {
+                        me.playCard(card.getUuid());
+                        if (card instanceof Spell) {
+                            me.drawCards(2);
                         }
-                        for (Card card : possiblePlays.get(0)) {
-                                me.playCard(card.getUuid());
-                            if (card instanceof Spell) {
-                                me.drawCards(2);
-                            }
-                        }
+                    }
 
+                    break;
+                case I_ATTACK:
+                    List<List<Pair>> possibleAttacks = getPossibleAttacks(me, opponent);
+                    shuffle(possibleAttacks);
+                    if (possibleAttacks.isEmpty()) {
                         break;
-                    case I_ATTACK:
-                        List<List<Pair>> possibleAttacks = getPossibleAttacks(me, opponent);
-                        shuffle(possibleAttacks);
-                        if (possibleAttacks.isEmpty()) {
-                            break;
-                        }
-                        List<Pair> move = possibleAttacks.get(0);
-                        for (Pair pair : move) {
-                            int power = 0;
-                            if (pair.getFrom().getType() == CardType.MONSTER) {
-                                power = ((Monster) pair.getFrom()).getAttack();
-                            } else {
-                                Spell spell = (Spell) pair.getFrom();
-                                if (spell.getAction() == SpellAction.DEAL_1_DAMAGE_DRAW_1_CARD) {
-                                    power = 1;
-                                }
-                                if (spell.getAction() == SpellAction.DEAL_2_DAMAGE_RESTORE_2_HEALTH) {
-                                    power = 2;
-                                }
+                    }
+                    List<Pair> move = possibleAttacks.get(0);
+                    for (Pair pair : move) {
+                        int power = 0;
+                        if (pair.getFrom().getType() == CardType.MONSTER) {
+                            power = ((Monster) pair.getFrom()).getAttack();
+                        } else {
+                            Spell spell = (Spell) pair.getFrom();
+                            if (spell.getAction() == SpellAction.DEAL_1_DAMAGE_DRAW_1_CARD) {
+                                power = 1;
                             }
-                            if (pair.getTo() == null) {
-                                try{
-                                    opponent.receiveAttack(power);
-                                } catch (PlayerDeadException e) {
-                                    break;
-                                }
-                            } else {
-                                opponent.receiveAttack(pair.getTo().getUuid(), power);
+                            if (spell.getAction() == SpellAction.DEAL_2_DAMAGE_RESTORE_2_HEALTH) {
+                                power = 2;
                             }
                         }
-                        me.moveMonstersToTable();
-                        break;
-                    case HE_DRAWS:
-                        opponent.beginTurn(round);
-                        opponent.shuffleDeck();
-                        opponent.drawCards(1);
-                        break;
-                    case HE_PLAYS:
-                        List<Set<Card>> hisPossiblePlays = opponent.getPossiblePlays();
-                        shuffle(hisPossiblePlays);
-                        if (hisPossiblePlays.isEmpty()) {
-                            break;
+                        if (pair.getTo() == null) {
+                            try {
+                                opponent.receiveAttack(power);
+                            } catch (PlayerDeadException e) {
+                                break;
+                            }
+                        } else {
+                            opponent.receiveAttack(pair.getTo().getUuid(), power);
                         }
-                        for (Card card : hisPossiblePlays.get(0)) {
-                                opponent.playCard(card.getUuid());
-                            if (card instanceof Spell) {
-                                opponent.drawCards(2);
+                    }
+                    me.moveMonstersToTable();
+                    break;
+                case HE_DRAWS:
+                    opponent.beginTurn(round);
+                    opponent.shuffleDeck();
+                    opponent.drawCards(1);
+                    break;
+                case HE_PLAYS:
+                    List<Set<Card>> hisPossiblePlays = opponent.getPossiblePlays();
+                    shuffle(hisPossiblePlays);
+                    if (hisPossiblePlays.isEmpty()) {
+                        break;
+                    }
+                    for (Card card : hisPossiblePlays.get(0)) {
+                        try {
+                            opponent.playCard(card.getUuid());
+                        } catch (IllegalMoveException e) {
+                        }
+                        if (card instanceof Spell) {
+                            opponent.drawCards(2);
+                        }
+                    }
+                    break;
+                case HE_ATTACKS:
+                    List<List<Pair>> hisPossibleAttacks = getPossibleAttacks(opponent, me);
+                    shuffle(hisPossibleAttacks);
+                    if (hisPossibleAttacks.isEmpty()) {
+                        break;
+                    }
+                    List<Pair> hisMove = hisPossibleAttacks.get(0);
+                    for (Pair pair : hisMove) {
+                        int power = 0;
+                        if (pair.getFrom().getType() == CardType.MONSTER) {
+                            power = ((Monster) pair.getFrom()).getAttack();
+                        } else {
+                            Spell spell = (Spell) pair.getFrom();
+                            if (spell.getAction() == SpellAction.DEAL_1_DAMAGE_DRAW_1_CARD) {
+                                power = 1;
+                            }
+                            if (spell.getAction() == SpellAction.DEAL_2_DAMAGE_RESTORE_2_HEALTH) {
+                                power = 2;
                             }
                         }
-                        break;
-                    case HE_ATTACKS:
-                        List<List<Pair>> hisPossibleAttacks = getPossibleAttacks(opponent, me);
-                        shuffle(hisPossibleAttacks);
-                        if (hisPossibleAttacks.isEmpty()) {
-                            break;
-                        }
-                        List<Pair> hisMove = hisPossibleAttacks.get(0);
-                        for (Pair pair : hisMove) {
-                            int power = 0;
-                            if (pair.getFrom().getType() == CardType.MONSTER) {
-                                power = ((Monster) pair.getFrom()).getAttack();
-                            } else {
-                                Spell spell = (Spell) pair.getFrom();
-                                if (spell.getAction() == SpellAction.DEAL_1_DAMAGE_DRAW_1_CARD) {
-                                    power = 1;
-                                }
-                                if (spell.getAction() == SpellAction.DEAL_2_DAMAGE_RESTORE_2_HEALTH) {
-                                    power = 2;
-                                }
+                        if (pair.getTo() == null) {
+                            try {
+                                me.receiveAttack(power);
+                            } catch (PlayerDeadException e) {
+                                break;
                             }
-                            if (pair.getTo() == null) {
-                                try{
-                                    me.receiveAttack(power);
-                                } catch (PlayerDeadException e) {
-                                    break;
-                                }
-                            } else {
-                                me.receiveAttack(pair.getTo().getUuid(), power);
-                            }
+                        } else {
+                            me.receiveAttack(pair.getTo().getUuid(), power);
                         }
-                        opponent.moveMonstersToTable();
-                        break;
-                }
+                    }
+                    opponent.moveMonstersToTable();
+                    break;
+            }
             state = state.next();
         }
 
@@ -405,7 +434,11 @@ public class Node {
                 '}';
     }
 
-	public double winRatio() {
-		return 1.0*reward/visited;
-	}
+    public double winRatio() {
+        return 1.0 * reward / visited;
+    }
+
+    public int getDepth() {
+        return children.stream().mapToInt(Node::getDepth).max().orElse(0) + 1;
+    }
 }

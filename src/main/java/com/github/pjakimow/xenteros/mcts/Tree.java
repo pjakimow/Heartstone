@@ -15,25 +15,38 @@ public class Tree {
         this.root = new Node(me, he, MoveToMake.I_PLAY, round);
     }
 
-    public void move(int seconds) {
+    public Node move(int seconds) {
         long start = System.currentTimeMillis();
         while (System.currentTimeMillis() - start < 1000*seconds) {
             Node selection = root.select();
             selection.simulate();
         }
 
-        System.out.println(root.getChildren());
-        double bestWay = 0;
+//        System.out.println(root.getChildren());
+        double bestWay = -1;
         Node best = null;
         for (Node node : root.getChildren()) {
             for (Node grandChild : node.getChildren()) {
 
-                if (grandChild.winRatio() > bestWay) {
+                if (grandChild.winRatio() >= bestWay) {
                     bestWay = grandChild.winRatio();
                     best = grandChild;
                 }
             }
         }
-        System.out.println(best);
+        if(best == null) {
+            System.out.println("Best == null" + root.getChildren().stream().mapToInt(s -> s.getChildren().size()).sum());
+            return move(seconds);
+        }
+//        System.out.println(best);
+        return best;
+    }
+
+    public int getPaths() {
+        return root.getVisited();
+    }
+
+    public int getDepth() {
+        return root.getDepth();
     }
 }

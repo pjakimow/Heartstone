@@ -50,6 +50,7 @@ public class Player {
         newPlayer.deck = this.getDeck().stream()
                 .map(Card::deepCopy)
                 .collect(Collectors.toCollection(LinkedList::new));
+        newPlayer.temp = this.temp.stream().map(Monster::fromMonster).collect(Collectors.toSet());
 
         return newPlayer;
     }
@@ -214,7 +215,7 @@ public class Player {
     public List<Set<Card>> getPossiblePlays() {
         return Sets.powerSet(hand.values().stream().filter(c -> c.getType() == MONSTER || (c.getType() == CardType.SPELL && ((Spell) c).getAction() == SpellAction.DRAW_2_CARDS)).collect(toSet()))
                 .stream()
-                .filter(ss -> ss.stream().mapToInt(Card::getCost).sum() < this.mana)
+                .filter(ss -> ss.stream().mapToInt(Card::getCost).sum() <= this.mana)
                 .filter(ss -> ss.stream().filter(c -> c.getType() == MONSTER).count() + this.table.size() <= 7)
                 .collect(toList());
     }
