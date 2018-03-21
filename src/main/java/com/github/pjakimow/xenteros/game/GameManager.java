@@ -103,19 +103,20 @@ class GameManager {
         playerService.setUp(white, black);
         int round = 1;
         while (true) {
-            System.out.println(format("--------ROUND %d--------",round));
-            System.out.println(format(">>White (%d HP) move:", white.getHealth()));
-            white.printHand();
-            white.printTable();
-            System.out.println(format(">Black (%d HP):", black.getHealth()));
+//            System.out.println(format("--------ROUND %d--------",round));
+//            System.out.println(format(">>White (%d HP) move:", white.getHealth()));
+            white.beginTurn(round);
+//            white.printHand();
+//            white.printTable();
+//            System.out.println(format(">Black (%d HP):", black.getHealth()));
 //            black.printHand();
 //            black.printTable();
             System.gc();
-            white.beginTurn(round);
             Tree tree = new Tree(white, black, round);
             Node move = tree.move(10);
-            System.out.println(tree.getPaths());
-            System.out.println(tree.getDepth());
+            System.out.println(tree.getStatistics());
+//            System.out.println(tree.getPaths());
+//            System.out.println(tree.getDepth());
             this.white = move.getMe();
             this.black = move.getOpponent();
             if (black.getHealth() <= 0) {
@@ -123,8 +124,8 @@ class GameManager {
                 return;
             }
 //            System.out.println("--------------");
-            System.out.println(format(">>Black (%d HP) move:", black.getHealth()));
-            System.out.println(format(">White (%d HP):", white.getHealth()));
+//            System.out.println(format(">>Black (%d HP) move:", black.getHealth()));
+//            System.out.println(format(">White (%d HP):", white.getHealth()));
 //            white.printHand();
 //            white.printTable();
             try {
@@ -136,8 +137,8 @@ class GameManager {
                 System.out.println("Black won!");
                 return;
             }
-            black.printHand();
-            black.printTable();
+//            black.printHand();
+//            black.printTable();
             round++;
         }
 

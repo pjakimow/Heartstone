@@ -60,7 +60,7 @@ public class ControllingPlayerService extends PlayerService{
     	} else {
         	cards = player.getCardsPossibleToPlay(player.getMana());
     	}
-    	System.out.println("controlling: " + cards.size());
+//    	System.out.println("controlling: " + cards.size());
     	Collections.sort(cards, new ControllCardComp());
     	return cards.size() > 0 ? cards.get(0) : null;
     	
@@ -93,15 +93,15 @@ public class ControllingPlayerService extends PlayerService{
             if (choice instanceof Monster) {
                 Monster monster = (Monster) choice;
                 
-                player.addMonsterToTable(monster);
                 if (monster.hasCharge()) {
-                   attackOpponent(monster.getAttack(), opponent);
+                    player.addMonsterToTable(monster);
+                    attackOpponent(monster.getAttack(), opponent);
                 }
             } else {
                 throwSpell((Spell) choice, player, opponent);
             }
         }
 
-        //player.moveMonstersToTable();
+        player.moveMonstersToTable();
     }
 }

@@ -56,18 +56,6 @@ public class Node {
     }
 
     private Node getBestChild(double c) {
-        Node result = null;
-        double best = 0, current = 0;
-
-        for (Node child : children) {
-            if (child.visited == 0)
-                return child;
-            current = child.reward / child.visited + (c * Math.sqrt(2 * Math.log(this.visited) / child.visited));
-            if (current >= best) {
-                result = child;
-                best = current;
-            }
-        }
 
         if (children.isEmpty()) {
             Node n = new Node(me, opponent, moveToMake.next(), round);
@@ -75,7 +63,22 @@ public class Node {
             return n;
         }
 
-        MoveToMake nextMove = moveToMake.next();
+        Node result = null;
+        double best = 0, current = 0;
+
+        for (Node child : children) {
+//            if (child.visited == 0) {
+//                return child;
+//            }
+            current = child.reward / child.visited + (c * Math.sqrt(2 * Math.log(this.visited) / child.visited));
+            if (current >= best) {
+                result = child;
+                best = current;
+            }
+        }
+
+
+        MoveToMake nextMove = result.moveToMake;
         switch (nextMove) {
             case I_DRAW:
                 return result.getBestChildDraw();
@@ -447,5 +450,13 @@ public class Node {
 
     public int getDepth() {
         return children.stream().mapToInt(Node::getDepth).max().orElse(0) + 1;
+    }
+
+    public void getLeafStatistics(List<Integer> depths, int depth) {
+        if (this.children.isEmpty()){
+            depths.add(depth);
+        } else {
+            children.forEach(n -> n.getLeafStatistics(depths, depth + 1));
+        }
     }
 }

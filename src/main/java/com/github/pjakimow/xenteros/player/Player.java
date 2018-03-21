@@ -212,6 +212,7 @@ public class Player {
 
     public void addMonsterToTable(Monster monster) {
         table.put(monster.getUuid(), monster);
+        temp.remove(monster);
     }
 
     public LinkedList<Card> getDeck() {

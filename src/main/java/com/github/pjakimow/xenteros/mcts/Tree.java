@@ -2,6 +2,10 @@ package com.github.pjakimow.xenteros.mcts;
 
 import com.github.pjakimow.xenteros.player.Player;
 
+import java.util.ArrayList;
+import java.util.IntSummaryStatistics;
+import java.util.List;
+
 public class Tree {
 
     private Node root;
@@ -48,5 +52,26 @@ public class Tree {
 
     public int getDepth() {
         return root.getDepth();
+    }
+
+
+    public String getStatistics() {
+
+        List<Integer> leafsDepths = new ArrayList<>();
+        root.getLeafStatistics(leafsDepths, 1);
+        leafsDepths.sort(Integer::compare);
+        IntSummaryStatistics statistics = leafsDepths.stream().mapToInt(Integer::intValue).summaryStatistics();
+        StringBuilder sb = new StringBuilder();
+        sb.append(root.getVisited())
+                .append(",")
+                .append(root.getDepth())
+                .append(",")
+                .append(statistics.getAverage())
+                .append(",")
+                .append(statistics.getMax())
+                .append(",")
+                .append(leafsDepths.get(leafsDepths.size()/2));
+
+        return sb.toString();
     }
 }
