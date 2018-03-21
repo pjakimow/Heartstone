@@ -228,7 +228,7 @@ public class Node {
         List<List<Pair>> result = new ArrayList<>();
         int rounds = (int) pow(base, cardsThatCanAttack.size());
 
-        if(from.getTable().stream().mapToInt(Monster::getAttack).sum() >= to.getHealth()) {
+        if(!to.getTable().stream().anyMatch(Monster::hasTaunt) && from.getTable().stream().mapToInt(Monster::getAttack).sum() >= to.getHealth()) {
             List<Pair> move = from.getTable().stream().map(m -> new Pair(m, null)).collect(toList());
             result.add(move);
             return result;
