@@ -5,8 +5,13 @@ import com.github.pjakimow.xenteros.mcts.Tree;
 import com.github.pjakimow.xenteros.player.ControllingPlayerService;
 import com.github.pjakimow.xenteros.player.Player;
 import com.github.pjakimow.xenteros.player.PlayerDeadException;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
 
 import static java.lang.String.format;
 
@@ -25,12 +30,21 @@ class GameManager {
 //        run2();
 //        run3();
 
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 40; i++) {
+            System.out.println(i);
+            this.white = null;
+            this.black = null;
+            System.gc();
+
             this.white = playerService.createPlayer();
             white.setName("WHITE");
             this.black = playerService.createPlayer();
             black.setName("BLACK");
-            run3();
+            try {
+                run3();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -97,11 +111,12 @@ class GameManager {
         }
     }
 
-    private void run3() {
+    private void run3() throws IOException {
 
 
         playerService.setUp(white, black);
         int round = 1;
+        File file = new File("results-controlling3.txt");
         while (true) {
 //            System.out.println(format("--------ROUND %d--------",round));
 //            System.out.println(format(">>White (%d HP) move:", white.getHealth()));
@@ -114,13 +129,17 @@ class GameManager {
             System.gc();
             Tree tree = new Tree(white, black, round);
             Node move = tree.move(10);
-            System.out.println(tree.getStatistics());
+            String statistics = tree.getStatistics();
+            System.out.println(statistics);
+            FileUtils.writeStringToFile(file, statistics + "\n", Charset.forName("UTF-8"), true);
 //            System.out.println(tree.getPaths());
 //            System.out.println(tree.getDepth());
             this.white = move.getMe();
             this.black = move.getOpponent();
             if (black.getHealth() <= 0) {
-                System.out.println("White won");
+                System.out.println("White won " + white.getHealth() + " " + black.getHealth());
+                FileUtils.writeStringToFile(file, "White won " + white.getHealth() + " " + black.getHealth() + "\n", Charset.forName("UTF-8"), true);
+
                 return;
             }
 //            System.out.println("--------------");
@@ -134,7 +153,9 @@ class GameManager {
                     throw new PlayerDeadException();
                 }
             } catch (PlayerDeadException e) {
-                System.out.println("Black won!");
+                System.out.println("Black won!" + white.getHealth() + " " + black.getHealth());
+                FileUtils.writeStringToFile(file, "Black won! " + white.getHealth() + " " + black.getHealth() + "\n", Charset.forName("UTF-8"), true);
+
                 return;
             }
 //            black.printHand();
