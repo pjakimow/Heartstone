@@ -66,7 +66,7 @@ public class RandomPlayerService extends PlayerService{
     	} else {
         	cards = player.getCardsPossibleToPlay(player.getMana());
     	}
-    	System.out.println("random: " + cards.size());
+    	//System.out.println("random: " + cards.size());
     	//Collections.sort(cards, new AttackCardComp());
     	return cards.size() > 0 ? cards.get(0) : null;
     	
