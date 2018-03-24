@@ -30,7 +30,7 @@ class GameManager {
 //        run2();
 //        run3();
 
-        for (int i = 0; i < 40; i++) {
+        for (int i = 0; i < 150; i++) {
             System.out.println(i);
             this.white = null;
             this.black = null;
@@ -116,9 +116,9 @@ class GameManager {
 
         playerService.setUp(white, black);
         int round = 1;
-        File file = new File("results-controlling-round-" + round +".txt");
-        File result = new File("results-controlling-summary.txt");
+        File result = new File("results-controlling-1s-summary.txt");
         while (true) {
+            File file = new File("results-controlling-1s-round-" + round +".txt");
 //            System.out.println(format("--------ROUND %d--------",round));
 //            System.out.println(format(">>White (%d HP) move:", white.getHealth()));
             white.beginTurn(round);
@@ -129,7 +129,7 @@ class GameManager {
 //            black.printTable();
             System.gc();
             Tree tree = new Tree(white, black, round);
-            Node move = tree.move(10);
+            Node move = tree.move(1);
             String statistics = tree.getStatistics();
             System.out.println(statistics);
             FileUtils.writeStringToFile(file, statistics + "\n", Charset.forName("UTF-8"), true);
