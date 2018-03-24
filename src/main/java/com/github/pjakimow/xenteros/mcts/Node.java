@@ -35,6 +35,7 @@ public class Node {
         this.round = round;
         switch (moveToMake) {
             case I_DRAW:
+                this.me.setMana(round);
                 this.possibleDraws = me.getDeck().stream().collect(toList());
                 break;
             case I_PLAY:
@@ -44,6 +45,7 @@ public class Node {
                 this.possibleAttacks = getPossibleAttacks(me, opponent);
                 break;
             case HE_DRAWS:
+                this.me.setMana(round);
                 this.possibleDraws = opponent.getDeck().stream().collect(toList());
                 break;
             case HE_PLAYS:
@@ -126,8 +128,10 @@ public class Node {
         this.addChild(n);
         if (moveToMake == MoveToMake.I_DRAW) {
             n.getMe().drawCard(c);
+            n.getMe().setMana(round);
         } else {
             n.getOpponent().drawCard(c);
+            n.getOpponent().setMana(round);
         }
         return n;
     }
@@ -308,7 +312,7 @@ public class Node {
             switch (state) {
                 case I_DRAW:
                     round++;
-                    me.beginTurn(round);
+                    me.setMana(round);
                     me.shuffleDeck();
                     me.drawCards(1);
                     break;
@@ -359,7 +363,7 @@ public class Node {
                     me.moveMonstersToTable();
                     break;
                 case HE_DRAWS:
-                    opponent.beginTurn(round);
+                    opponent.setMana(round);
                     opponent.shuffleDeck();
                     opponent.drawCards(1);
                     break;
@@ -457,6 +461,14 @@ public class Node {
             depths.add(depth);
         } else {
             children.forEach(n -> n.getLeafStatistics(depths, depth + 1));
+        }
+    }
+
+    public int getSize() {
+        if (this.children.isEmpty()) {
+            return 1;
+        } else {
+            return this.children.stream().mapToInt(Node::getSize).sum() + 1;
         }
     }
 }

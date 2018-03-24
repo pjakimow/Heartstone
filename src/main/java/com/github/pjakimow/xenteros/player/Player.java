@@ -97,10 +97,10 @@ public class Player {
 
         Card card = hand.get(uuid);
         if (card.getCost() > this.mana) {
-            throw new IllegalMoveException();
+            throw new IllegalMoveException("Card was too expensive");
         }
         if (card instanceof Monster && table.size() + temp.size() >= 7) {
-            throw new IllegalMoveException();
+            throw new IllegalMoveException("Too many monsters: " + (table.size() + temp.size()));
         }
 
         if (card instanceof Monster) {
@@ -125,7 +125,7 @@ public class Player {
         }
         attackedCard.receiveAttack(power);
 
-        if (attackedCard.getHealth() < 0) {
+        if (attackedCard.getHealth() <= 0) {
             table.remove(uuid);
         }
     }
@@ -220,14 +220,16 @@ public class Player {
     }
 
     public List<Set<Card>> getPossiblePlays() {
-        List<Set<Card>> plays = Sets.powerSet(hand.values().stream().filter(c -> c.getType() == MONSTER || (c.getType() == CardType.SPELL && ((Spell) c).getAction() == SpellAction.DRAW_2_CARDS)).collect(toSet()))
+        Set<Set<Card>> sets = Sets.powerSet(hand.values().stream().filter(c -> c.getType() == MONSTER || (c.getType() == CardType.SPELL && ((Spell) c).getAction() == SpellAction.DRAW_2_CARDS)).collect(toSet()));
+        List<Set<Card>> plays =
+        sets
                 .stream()
                 .filter(ss -> ss.stream().mapToInt(Card::getCost).sum() <= this.mana)
-                .filter(ss -> ss.stream().filter(c -> c.getType() == MONSTER).count() + this.table.size() <= 7)
+                .filter(ss -> ss.stream().filter(c -> c.getType() == MONSTER).count() + this.table.size() + this.temp.size() <= 7)
                 .collect(toList());
-        if (plays.size() > 0) {
-            plays.removeIf(Set::isEmpty);
-        }
+//        if (plays.size() > 0) {
+//            plays.removeIf(Set::isEmpty);
+//        }
         return plays;
     }
 

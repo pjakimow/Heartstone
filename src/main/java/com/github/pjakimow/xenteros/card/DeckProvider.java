@@ -40,7 +40,7 @@ public class DeckProvider {
         Monster[] monsters = gson.fromJson(sb.toString(), Monster[].class);
 
         return Arrays.stream(monsters)
-                .flatMap(m -> Stream.of(m, m))
+                .flatMap(m -> Stream.of(new Monster(CardType.MONSTER, m.getCost(), m.getAttack(), m.getHealth(), m.getMonsterAbility()), m))
                 .map(Monster::fromMonster)
                 .collect(toSet());
     }
@@ -55,7 +55,7 @@ public class DeckProvider {
 
         return Arrays.stream(monsters)
                 .flatMap(s -> Stream.of(s, s))
-                .map(Spell::fromSpell)
+                .map(s->new Spell(CardType.SPELL, s.getCost(), s.getAction()))
                 .collect(toSet());
     }
 

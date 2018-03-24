@@ -116,7 +116,8 @@ class GameManager {
 
         playerService.setUp(white, black);
         int round = 1;
-        File file = new File("results-controlling3.txt");
+        File file = new File("results-controlling-round-" + round +".txt");
+        File result = new File("results-controlling-summary.txt");
         while (true) {
 //            System.out.println(format("--------ROUND %d--------",round));
 //            System.out.println(format(">>White (%d HP) move:", white.getHealth()));
@@ -138,7 +139,7 @@ class GameManager {
             this.black = move.getOpponent();
             if (black.getHealth() <= 0) {
                 System.out.println("White won " + white.getHealth() + " " + black.getHealth());
-                FileUtils.writeStringToFile(file, "White won " + white.getHealth() + " " + black.getHealth() + "\n", Charset.forName("UTF-8"), true);
+                FileUtils.writeStringToFile(result, white.getHealth() + " " + black.getHealth() + "\n", Charset.forName("UTF-8"), true);
 
                 return;
             }
@@ -154,7 +155,7 @@ class GameManager {
                 }
             } catch (PlayerDeadException e) {
                 System.out.println("Black won!" + white.getHealth() + " " + black.getHealth());
-                FileUtils.writeStringToFile(file, "Black won! " + white.getHealth() + " " + black.getHealth() + "\n", Charset.forName("UTF-8"), true);
+                FileUtils.writeStringToFile(result, white.getHealth() + " " + black.getHealth() + "\n", Charset.forName("UTF-8"), true);
 
                 return;
             }

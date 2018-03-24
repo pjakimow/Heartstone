@@ -27,12 +27,12 @@ public class Tree {
         }
 
 //        System.out.println(root.getChildren());
-        double bestWay = -1;
+        double bestWay = Double.MAX_VALUE;
         Node best = null;
         for (Node node : root.getChildren()) {
             for (Node grandChild : node.getChildren()) {
 
-                if (grandChild.winRatio() >= bestWay) {
+                if (grandChild.winRatio() <= bestWay) {
                     bestWay = grandChild.winRatio();
                     best = grandChild;
                 }
@@ -71,6 +71,8 @@ public class Tree {
                 .append(statistics.getMax())
                 .append(",")
                 .append(leafsDepths.get(leafsDepths.size()/2));
+
+        System.out.println(root.getSize());
 
         return sb.toString();
     }

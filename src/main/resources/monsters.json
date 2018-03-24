@@ -2,19 +2,19 @@
   {
     "type": "MONSTER",
     "cost": 1,
-    "attack": 2,
+    "attack": 4,
     "health": 5
   },
   {
     "type": "MONSTER",
     "cost": 1,
-    "attack": 3,
+    "attack": 6,
     "health": 6
   },
   {
     "type": "MONSTER",
     "cost": 1,
-    "attack": 4,
+    "attack": 8,
     "health": 7
   },
   {
