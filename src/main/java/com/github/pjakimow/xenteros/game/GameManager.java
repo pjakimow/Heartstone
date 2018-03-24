@@ -30,7 +30,7 @@ class GameManager {
 //        run2();
 //        run3();
 
-        for (int i = 0; i < 40; i++) {
+        for (int i = 0; i < 10; i++) {
             System.out.println(i);
             this.white = null;
             this.black = null;
@@ -116,12 +116,12 @@ class GameManager {
 
         playerService.setUp(white, black);
         int round = 1;
-        File file = new File("results-controlling-round-" + round +".txt");
-        File result = new File("results-controlling-summary.txt");
+        File file = new File("results-controlling-10sek.txt");
+        File result = new File("results-controlling-summary-10sek.txt");
         while (true) {
-//            System.out.println(format("--------ROUND %d--------",round));
+            System.out.println(format("--------ROUND %d--------",round));
 //            System.out.println(format(">>White (%d HP) move:", white.getHealth()));
-            white.beginTurn(round);
+//            white.beginTurn(round);
 //            white.printHand();
 //            white.printTable();
 //            System.out.println(format(">Black (%d HP):", black.getHealth()));
@@ -138,13 +138,16 @@ class GameManager {
             this.white = move.getMe();
             this.black = move.getOpponent();
             if (black.getHealth() <= 0) {
+                FileUtils.writeStringToFile(file, "---\n", Charset.forName("UTF-8"), true);
                 System.out.println("White won " + white.getHealth() + " " + black.getHealth());
                 FileUtils.writeStringToFile(result, white.getHealth() + " " + black.getHealth() + "\n", Charset.forName("UTF-8"), true);
 
                 return;
             }
-//            System.out.println("--------------");
+            System.out.println("--------------");
 //            System.out.println(format(">>Black (%d HP) move:", black.getHealth()));
+//            black.printHand();
+//            black.printTable();
 //            System.out.println(format(">White (%d HP):", white.getHealth()));
 //            white.printHand();
 //            white.printTable();
@@ -154,6 +157,7 @@ class GameManager {
                     throw new PlayerDeadException();
                 }
             } catch (PlayerDeadException e) {
+                FileUtils.writeStringToFile(file, "---\n", Charset.forName("UTF-8"), true);
                 System.out.println("Black won!" + white.getHealth() + " " + black.getHealth());
                 FileUtils.writeStringToFile(result, white.getHealth() + " " + black.getHealth() + "\n", Charset.forName("UTF-8"), true);
 
