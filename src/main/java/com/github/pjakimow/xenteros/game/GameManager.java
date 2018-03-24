@@ -119,14 +119,14 @@ class GameManager {
         File file = new File("results-controlling-round-" + round +".txt");
         File result = new File("results-controlling-summary.txt");
         while (true) {
-//            System.out.println(format("--------ROUND %d--------",round));
-//            System.out.println(format(">>White (%d HP) move:", white.getHealth()));
+            System.out.println(format("--------ROUND %d--------",round));
+            System.out.println(format(">>White (%d HP) move:", white.getHealth()));
             white.beginTurn(round);
-//            white.printHand();
-//            white.printTable();
-//            System.out.println(format(">Black (%d HP):", black.getHealth()));
-//            black.printHand();
-//            black.printTable();
+            white.printHand();
+            white.printTable();
+            System.out.println(format(">Black (%d HP):", black.getHealth()));
+            black.printHand();
+            black.printTable();
             System.gc();
             Tree tree = new Tree(white, black, round);
             Node move = tree.move(10);
@@ -143,11 +143,13 @@ class GameManager {
 
                 return;
             }
-//            System.out.println("--------------");
-//            System.out.println(format(">>Black (%d HP) move:", black.getHealth()));
-//            System.out.println(format(">White (%d HP):", white.getHealth()));
-//            white.printHand();
-//            white.printTable();
+            System.out.println("--------------");
+            System.out.println(format(">>Black (%d HP) move:", black.getHealth()));
+            black.printHand();
+            black.printTable();
+            System.out.println(format(">White (%d HP):", white.getHealth()));
+            white.printHand();
+            white.printTable();
             try {
                 playerService.move(black, white, round);
                 if (white.getHealth() < 0) {

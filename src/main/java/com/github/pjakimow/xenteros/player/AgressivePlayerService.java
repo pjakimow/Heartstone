@@ -22,17 +22,19 @@ public class AgressivePlayerService extends PlayerService{
     private void attackOpponent(int power, Player opponent) {
     	if (!opponent.hasTaunt()){
     		opponent.receiveAttack(power);
+    		System.out.println("atak hero with power " + power);
     	} else {
             List<Monster> opponentTauntCards = opponent.getMonstersToAttack();
             //TODO:which one to attack? now: randomly
             int choice = (int) (Math.random() * opponentTauntCards.size());
             opponent.receiveAttack(opponentTauntCards.get(choice).getUuid(), power);
+            System.out.println("atak: " + opponentTauntCards.get(choice) +" with power " + power);
     	}
     }
     
     private void throwSpell(Spell spell, Player player, Player opponent) {
         SpellAction spellAction = spell.getAction();
-
+        System.out.println("zaklęcie: " + spellAction);
         switch (spellAction) {
             case DEAL_1_DAMAGE_DRAW_1_CARD:
                 player.drawCards(1);
@@ -58,7 +60,7 @@ public class AgressivePlayerService extends PlayerService{
     	} else {
         	cards = player.getCardsPossibleToPlay(player.getMana());
     	}
-    	System.out.println("agressive" + cards.size());
+    	//System.out.println("agressive" + cards.size());
     	Collections.sort(cards, new AttackCardComp2());
     	return cards.size() > 0 ? cards.get(0) : null;
     	
@@ -77,6 +79,7 @@ public class AgressivePlayerService extends PlayerService{
         while (player.canPlayCard()) {
 
         	Card choice = chooseCard(player);
+            System.out.println("Wybierz: " + choice);
             if (choice == null) {
                 break;
             }

@@ -77,6 +77,7 @@ local.properties
 .idea/**/sqlDataSources.xml
 .idea/**/dynamic.xml
 .idea/**/uiDesigner.xml
+.idea/
 
 # Gradle:
 .idea/**/gradle.xml
@@ -117,7 +118,7 @@ fabric.properties
 ### Intellij Patch ###
 # Comment Reason: https://github.com/joeblau/gitignore.io/issues/186#issuecomment-215987721
 
-# *.iml
+*.iml
 # modules.xml
 # .idea/misc.xml
 # *.ipr
@@ -134,6 +135,9 @@ fabric.properties
 
 # BlueJ files
 *.ctxt
+
+# Files with results
+results-*.txt
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
