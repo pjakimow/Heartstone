@@ -2,32 +2,36 @@
   {
     "type": "MONSTER",
     "cost": 1,
+    "attack": 2,
+    "health": 4
+  },
+  {
+    "type": "MONSTER",
+    "cost": 2,
+    "attack": 3,
+    "health": 6,
+    "monsterAbility": "CHARGE"
+  },
+  {
+    "type": "MONSTER",
+    "cost": 3,
     "attack": 4,
-    "health": 5
+    "health": 7,
+    "monsterAbility": "TAUNT"
   },
   {
     "type": "MONSTER",
     "cost": 1,
+    "attack": 2,
+    "health": 8,
+    "monsterAbility": "CHARGE"
+  },
+  {
+    "type": "MONSTER",
+    "cost": 4,
     "attack": 6,
-    "health": 6
-  },
-  {
-    "type": "MONSTER",
-    "cost": 1,
-    "attack": 8,
-    "health": 7
-  },
-  {
-    "type": "MONSTER",
-    "cost": 1,
-    "attack": 5,
-    "health": 8
-  },
-  {
-    "type": "MONSTER",
-    "cost": 1,
-    "attack": 6,
-    "health": 9
+    "health": 9,
+    "monsterAbility": "TAUNT"
   },
   {
     "type": "MONSTER",
